@@ -2,7 +2,6 @@
 #include "fichier.h"
 #include <fstream>
 
-
 Parcours::Parcours(string chemin)
 {
 	path *p = stringToPath(chemin);
@@ -83,7 +82,7 @@ void Parcours::rmvFromBL(string chemin)
 	}
 }
 
-void Parcours::executer()
+void Parcours::runAll()
 {
 	/* On execute le parcours résursif
 	 * Si un résultat est un fichier :
@@ -94,4 +93,44 @@ void Parcours::executer()
 	 * On recommence jusqu'a pile vide
 	 *
 	 */
+	map<string, path*>::iterator it=listeblanche.begin();
+	map<string, path*>::iterator end=listeblanche.end();
+	for(; it!=end; ++it){
+		runFromPath(*it);
+	}
+}
+
+void Parcours::runFromPath(const pair<string, path*>& thePair)
+{
+	list<path*> directories;
+	directories.push_back(thePair.second);
+	try {
+		while (!directories.empty()) {
+			if (exists(*directories.front())) {
+				if (is_regular_file(*directories.front())) {
+					Fichier *f = new Fichier(*directories.front());
+					f->remplir();
+					if (f->getid() == -1)
+						f->insert();
+					else f->updateIntoDB();
+				}
+				else if (is_directory(*directories.front()) && !isInBlacklist(*directories.front())){
+					directories.push_back(directories.front());
+				}
+				else cout << directories.front()->string() << " exists, but is neither a regular file nor a directory\n";
+			}
+			else cout << directories.front()->string() << " does not exist anymore (deleted file during process ?";
+			directories.pop_front();
+		}
+	}
+	catch (const filesystem_error& ex) {
+		cout << ex.what() << '\n';
+	}
+}
+
+bool Parcours::isInBlacklist(path & p)
+{
+	if (listenoire.find(p.string()) == listenoire.end())
+		return 0;
+	return -1;
 }
