@@ -17,11 +17,17 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     ./parcours.cpp \
-    fichier.cpp
+    fichier.cpp \
+    sql.cpp
 
 HEADERS += \
     ./parcours.h \
-    fichier.h
+    fichier.h \
+    sql.h
 
-LIBS+=/usr/lib/libboost_system.so \
-    /usr/lib/libboost_filesystem.so
+LIBS+=/usr/lib/x86_64-linux-gnu/libboost_system.so \
+    /usr/lib/x86_64-linux-gnu/libboost_filesystem.so \
+	-ltomcrypt
+	
+
+

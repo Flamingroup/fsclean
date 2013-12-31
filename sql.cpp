@@ -1,5 +1,6 @@
 #include "sql.h"
 
+#include <string.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -16,9 +17,9 @@ bool Sql::sqlInsert(Fichier f)
     ///    perror("open log"), exit(1);
     ///
     ostringstream sortie;
-    sortie <<f.getid()<<";"<<f.getPath()<<";"<<f.getMD5()<<";"<<f.getfilenameTrime()<<";"<<f.getPoids()<<";"<<f.getDateModif() << endl;
+	sortie << "*" << f.getPath()<<";"<<f.getMD5()<<";"<<f.getfilenameTrime()<<";"<<f.getPoids()<<";"<<f.getDateModif() << "*";
     string ligne = sortie.str();
-    cout<<sortie;//"ligne="<<ligne<<endl<<"sizeofligne="<<sizeof(ligne)<<endl;
+    cout<<"ligne="<<ligne<<endl<<"sizeofligne="<<ligne.size()<<endl;
     /*
     if(!write(log, &ligne, sizeof(ligne)))
         perror("write log"), exit(1);
