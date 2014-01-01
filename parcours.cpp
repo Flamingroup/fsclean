@@ -17,8 +17,8 @@ Parcours::Parcours(string chemin) {
         // 2: on insère dans liste noire
         //cout<<"debut while : "<<endl;
 		while (getline(config, ligne)) {
-            //cout<<"test2"<<endl;
-            //cout<<"ligne="<<ligne<<endl;
+			if (ligne[0] != '#')
+				continue;
 			if (mode == 0 && ligne != "listeblanche")
 				continue;
 			if (mode == 0 && ligne == "listeblanche"){
@@ -26,7 +26,7 @@ Parcours::Parcours(string chemin) {
 				continue;
 			}
 			if (mode == 1 && ligne != "listenoire") {
-                cout<<"listeBlanche mise à jour"<<endl;
+				cout<<"listeBlanche mise à jour"<<endl;
 				addToWL(ligne);
 			}
 			if (mode == 1 && ligne == "listenoire") {
