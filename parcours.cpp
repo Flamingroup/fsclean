@@ -5,8 +5,7 @@
 #include <string>
 #include <fstream>
 
-Parcours::Parcours(string chemin)
-{
+Parcours::Parcours(string chemin) {
     cout<<"Parcours::Parcours()\n"<<endl;
     //cout<<chemin<<endl;
     ifstream config(chemin.c_str(), ios_base::in);
@@ -46,17 +45,24 @@ Parcours::Parcours(string chemin)
     cout<<"fin Parcours::Parcours()"<<endl;
 }
 
-path* Parcours::stringToPath(string toTransform)
-{
-	if (toTransform[0] == '~' || !exists(toTransform))
+path* Parcours::stringToPath(string toTransform) {
+	if (toTransform[0] == '~') {
+		if (toTransform.length() == 1) {
+			toTransform=secure_getenv("HOME");
+		}
+		else {
+			toTransform.erase(toTransform.begin());
+			toTransform=secure_getenv("HOME")+toTransform;
+		}
+	}
+	if (!exists(toTransform))
 		return 0;
 	path *p=new path(toTransform);
 	*p=canonical(*p);
     return p;
 }
 
-void Parcours::voirWL()
-{
+void Parcours::voirWL() {
     cout<<"contenu Wlist : "<<endl;
     map<string, path*>::iterator it = listeblanche.begin();
     map<string, path*>::iterator fin = listeblanche.end();
@@ -65,8 +71,7 @@ void Parcours::voirWL()
     }
 }
 
-void Parcours::voirBL()
-{
+void Parcours::voirBL() {
     cout<<"contenu Blist : "<<endl;
     map<string, path*>::iterator it = listenoire.begin();
     map<string, path*>::iterator fin = listenoire.end();
@@ -75,9 +80,7 @@ void Parcours::voirBL()
     }
 }
 
-void Parcours::addToWL(string chemin)
-{
-    ///attention : le path ne prend pas la fin du chemin!
+void Parcours::addToWL(string chemin) {
     path *tmp = stringToPath(chemin);
 	if (tmp == NULL) return;
     cout << "addToWL : path tmp=" << tmp->string() <<endl;
@@ -88,8 +91,7 @@ void Parcours::addToWL(string chemin)
     else cout<<"deja dans WL"<<endl;
 }
 
-void Parcours::addToBL(string chemin)
-{
+void Parcours::addToBL(string chemin) {
     path *tmp = stringToPath(chemin);
 	if (tmp == NULL) return;
     cout << "addToBL : path tmp=" << tmp->string() <<endl;
@@ -100,9 +102,7 @@ void Parcours::addToBL(string chemin)
     else cout<<"deja dans BL"<<endl;
 }
 
-void Parcours::rmvFromWL(string chemin)
-{
-
+void Parcours::rmvFromWL(string chemin) {
 	path *tmp = stringToPath(chemin);
 	if (tmp == NULL) return;
 	map<string, path*>::iterator it=listeblanche.find(tmp->string());
@@ -113,8 +113,7 @@ void Parcours::rmvFromWL(string chemin)
 
 }
 
-void Parcours::rmvFromBL(string chemin)
-{
+void Parcours::rmvFromBL(string chemin) {
 	path *tmp = stringToPath(chemin);
 	if (tmp == NULL) return;
 	map<string, path*>::iterator it=listenoire.find(tmp->string());
@@ -124,8 +123,7 @@ void Parcours::rmvFromBL(string chemin)
 	}
 }
 
-void Parcours::runAll()
-{
+void Parcours::runAll() {
 	/* On execute le parcours résursif
 	 * Si un résultat est un fichier :
 	 *		on remplis les attributs d'un fichier
@@ -143,8 +141,7 @@ void Parcours::runAll()
 	}
 }
 
-void Parcours::runFromPath(const pair<string, path*>& thePair)
-{
+void Parcours::runFromPath(const pair<string, path*>& thePair) {
 	list<path*> directories;
     directories.push_back(new path(*thePair.second));
 	Fichier f;
@@ -175,8 +172,7 @@ void Parcours::runFromPath(const pair<string, path*>& thePair)
     }
 }
 
-bool Parcours::isInBlacklist(const path & p)
-{
+bool Parcours::isInBlacklist(const path & p) {
 	if (listenoire.find(p.string()) == listenoire.end())
 		return false;
 	return true;

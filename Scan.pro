@@ -30,4 +30,7 @@ LIBS+=/usr/lib/x86_64-linux-gnu/libboost_system.so \
 	-ltomcrypt
 	
 
+OTHER_FILES += \
+    config.cfg
+
 

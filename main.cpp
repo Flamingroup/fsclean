@@ -26,18 +26,58 @@ int main(int argc, char *argv[])
 	 *		sinon le créer , le remplis avec les valeurs par défaut
 	 *		le load comme config du find
     */
-    cout<<"Creation parcours"<<endl;
-    Parcours parc;
-    cout<<"runall sur parcours"<<endl;
-    parc.runAll();
-    cout<<"test whitelist"<<endl;
-    parc.voirWL();
-    cout<<"test blacklist"<<endl;
-    parc.voirBL();
-    cout<<"fin main"<<endl;
-    //tester avec test dans ./a dossier pour vérifier taille dossier
-    return 0;
+	cout<<"Creation parcours"<<endl;
+	Parcours parc;
+	cout<<"runall sur parcours"<<endl;
+	parc.runAll();
+	cout<<"test whitelist"<<endl;
+	parc.voirWL();
+	cout<<"test blacklist"<<endl;
+	parc.voirBL();
+	cout<<"fin main"<<endl;
+	//tester avec test dans ./a dossier pour vérifier taille dossier
+	return 0;
 }
+
+//path p (argv[1]);   // p reads clearer than argv[1] in the following code
+
+//	try
+//	{
+//		if (exists(p))    // does p actually exist?
+//		{
+//			if (is_regular_file(p))        // is p a regular file?
+//				cout << p << " size is " << file_size(p) << '\n';
+
+//			else if (is_directory(p))      // is p a directory?
+//			{
+//				cout << p << " is a directory containing:\n";
+//				directory_iterator it(p);
+//				directory_iterator end;
+//				for (; it != end; ++it){
+//					cout<< *it << " : " << endl;
+//				}
+//				cout << endl;
+//				copy(directory_iterator(p), directory_iterator(), // directory_iterator::value_type
+//					 ostream_iterator<directory_entry>(cout, "\n")); // is directory_entry, which is
+//				// converted to a path by the
+//				// path stream inserter
+//			}
+
+//			else
+//				cout << p << " exists, but is neither a regular file nor a directory\n";
+//		}
+//		else
+//			cout << p << " does not exist\n";
+//	}
+
+//	catch (const filesystem_error& ex)
+//	{
+//		cout << ex.what() << '\n';
+//	}
+
+//	return 0;
+//}
+
 
 /* Version avec le find non portable
  *

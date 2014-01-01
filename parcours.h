@@ -30,7 +30,7 @@ class Parcours
 		 * @param toTransform : chemin du fichier à transformer
 		 * @return
 		 */
-		path *stringToPath(string toTransform);
+		path* stringToPath(string toTransform);
         void voirWL();
         void voirBL();
 		void addToWL(string chemin);
