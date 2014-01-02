@@ -1,6 +1,7 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include "parcours.h"
+#include "sql.h"
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -25,9 +26,19 @@ int main(int argc, char *argv[])
 	 *si le fichier de config du find existe sinon le créer par défaut
 	 *		sinon le créer , le remplis avec les valeurs par défaut
 	 *		le load comme config du find
-    */
+	*/
+//	path p (argv[1]);
+//	Sql* mabase=Sql::getInstance();
+//	mabase->sqlRaz();
+//	Fichier f;
+//	f.remplir(p);
+//	mabase->sqlInsert(f);
+//	mabase->sqlDelDeletedFiles();
+//	mabase->Affiche();
+
 	cout<<"Creation parcours"<<endl;
 	Parcours parc;
+	Sql* mabase=Sql::getInstance();
 	cout<<"runall sur parcours"<<endl;
 	parc.runAll();
 	cout<<"test whitelist"<<endl;
@@ -35,6 +46,7 @@ int main(int argc, char *argv[])
 	cout<<"test blacklist"<<endl;
 	parc.voirBL();
 	cout<<"fin main"<<endl;
+	mabase->Affiche();
 	//tester avec test dans ./a dossier pour vérifier taille dossier
 	return 0;
 }

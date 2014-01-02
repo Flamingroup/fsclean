@@ -41,7 +41,7 @@ Parcours::Parcours(string chemin) {
         //cout<<"fin while"<<endl;
 		config.close();
 	}
-    //else cout<<"config!"<<endl;
+	else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
     cout<<"fin Parcours::Parcours()"<<endl;
 }
 
@@ -54,6 +54,9 @@ path* Parcours::stringToPath(string toTransform) {
 			toTransform.erase(toTransform.begin());
 			toTransform=secure_getenv("HOME")+toTransform;
 		}
+	}
+	else if (toTransform[0] != '/'){
+		toTransform=boost::filesystem::initial_path().string()+'/'+toTransform;
 	}
 	if (!exists(toTransform))
 		return 0;
@@ -133,15 +136,19 @@ void Parcours::runAll() {
 	 * On recommence jusqu'a pile vide
 	 *
 	 */
+	Sql* mabase=Sql::getInstance();
+	mabase->sqlRaz();
 	map<string, path*>::iterator it=listeblanche.begin();
 	map<string, path*>::iterator end=listeblanche.end();
 	for(; it!=end; ++it){
         cout<<"Parcours::runall() : "<<(*it).first<<endl<<" va etre inspecté"<<endl;
 		runFromPath(*it);
 	}
+	mabase->sqlDelDeletedFiles();
 }
 
 void Parcours::runFromPath(const pair<string, path*>& thePair) {
+	Sql* mabase=Sql::getInstance();
 	list<path*> directories;
     directories.push_back(new path(*thePair.second));
 	Fichier f;
@@ -153,7 +160,7 @@ void Parcours::runFromPath(const pair<string, path*>& thePair) {
                 for (; it != end; ++it){
 					if(is_regular_file(*it) && !isInBlacklist(it->path())) {
                         f.remplir(it->path());
-                        Sql::sqlInsert(f);
+						mabase->sqlInsert(f);
                     }
 					else if(is_directory(*it) && !isInBlacklist(it->path())) {
                         directories.push_back(new path(it->path()));

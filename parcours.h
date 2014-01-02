@@ -24,13 +24,13 @@ class Parcours
 		 * @brief Parcours
 		 * @param chemin : chemin du fichier contenant les paramètres de recherche des doublons
 		 */
-        Parcours(string chemin="./config.cfg");
+		Parcours(string chemin="./config.cfg");
 		/**
 		 * @brief stringToPath : Transforme nimporte quelle string de chemin relatif en path avec chemin absolu
 		 * @param toTransform : chemin du fichier à transformer
 		 * @return
 		 */
-		path* stringToPath(string toTransform);
+		static path* stringToPath(string toTransform);
         void voirWL();
         void voirBL();
 		void addToWL(string chemin);

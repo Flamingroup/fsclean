@@ -4,8 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core
-
+QT       += core \
+            sql
 QT       -= gui
 
 TARGET = Scan
@@ -29,8 +29,9 @@ LIBS+=/usr/lib/x86_64-linux-gnu/libboost_system.so \
     /usr/lib/x86_64-linux-gnu/libboost_filesystem.so \
 	-ltomcrypt
 	
-
 OTHER_FILES += \
     config.cfg
+
+QMAKE_CXXFLAGS += -std=c++11
 
 

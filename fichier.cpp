@@ -20,7 +20,7 @@ const string &Fichier::getMD5() const
     return MD5;
 }
 
-const path& Fichier::getPath() const
+const path& Fichier::getChemin() const
 {
     return chemin;
 }
@@ -63,8 +63,8 @@ void Fichier::remplir(path p)
     poids = 0;
     dateModif = 0;
     //on remplit
-    chemin = p;
-    filenameTrime = trim(chemin.string());
+	chemin = canonical(p); // si segfault : faire par copie
+	filenameTrime = trim(chemin.filename().string());
     poids = file_size(p);
     dateModif = last_write_time(p);
     //attention si le fichier n'est pas un fichier certains champs ne seront pas corrects
@@ -77,4 +77,14 @@ string Fichier::trim(string s)
 	while((position=s.find_first_of("'-._ ")) != s.npos)
 		s.erase(position, 1);
 	return s;
+}
+
+void Fichier::voir()
+{
+	cout << "id : " << id << endl;
+	cout << "chemin : " << chemin.string() << endl;
+	cout << "filenametrime : " << filenameTrime << endl;
+	cout << "Poids : " << poids << endl;
+	cout << "date : " << dateModif << endl;
+	cout << "MD5 : " << MD5 << endl;
 }

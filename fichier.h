@@ -11,24 +11,26 @@ class Fichier
 	private:
 		int id;
 		path chemin;
-		string MD5; //ne pas remplir pour tous les fichiers
 		string filenameTrime;
 		u_int64_t poids;
-        u_int32_t dateModif;
+		u_int32_t dateModif;
+		string MD5; //ne pas remplir pour tous les fichiers
         //bool verifToujoursExistant
 	public:
         Fichier();
-        const u_int32_t& getDateModif() const;
-        const string& getMD5() const;
-        const path &getPath() const;
-        void setPoids(u_int64_t pds);
-        const u_int64_t& getPoids()const;
 		void setid(int i);
-        int getid()const;
+		int getid() const;
+		const path& getChemin() const;
 		void setfilenameTrime(string s);
-        const string& getfilenameTrime()const;
-        void remplir(path p);
+		const string& getfilenameTrime() const;
+		void setPoids(u_int64_t pds);
+		const u_int64_t& getPoids() const;
+		const u_int32_t& getDateModif() const;
+		const string& getMD5() const;
+
+		void remplir(path p);
 		string trim(string s);
+		void voir();
 };
 #endif // FICHIER_H
 
