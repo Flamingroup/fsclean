@@ -19,12 +19,14 @@ TEMPLATE = app
 SOURCES += main.cpp \
     ./parcours.cpp \
     fichier.cpp \
-    sql.cpp
+    sql.cpp \
+    mainwindow.cpp
 
 HEADERS += \
     ./parcours.h \
     fichier.h \
-    sql.h
+    sql.h \
+    mainwindow.h \
 
 LIBS+=/usr/lib/i386-linux-gnu/libboost_filesystem.so \
     /usr/lib/i386-linux-gnu/libboost_system.so \
@@ -36,5 +38,8 @@ OTHER_FILES += \
     config.cfg
 
 QMAKE_CXXFLAGS += -std=c++11
+
+FORMS += \
+    interface.ui
 
 

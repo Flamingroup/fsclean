@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QListView" name="WhiteList">
+   <widget class="QListView" name="listwhiteList">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -24,7 +24,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QColumnView" name="AffichageDoublons">
+   <widget class="QColumnView" name="listaffichageDoublons">
     <property name="geometry">
      <rect>
       <x>130</x>
@@ -34,7 +34,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QListView" name="listView">
+   <widget class="QListView" name="listblacklist">
     <property name="geometry">
      <rect>
       <x>400</x>
@@ -44,7 +44,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="labellisteblanche">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -57,7 +57,7 @@
      <string>Liste Blanche</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="labeldoublons">
     <property name="geometry">
      <rect>
       <x>220</x>
@@ -70,7 +70,7 @@
      <string>Doublons</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="labellistenoire">
     <property name="geometry">
      <rect>
       <x>410</x>
@@ -83,7 +83,7 @@
      <string>Liste Noire</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="Buttonsupprimer">
     <property name="geometry">
      <rect>
       <x>208</x>
@@ -96,7 +96,7 @@
      <string>Supprimer</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="Buttonmasquer">
     <property name="geometry">
      <rect>
       <x>130</x>
@@ -109,7 +109,7 @@
      <string>Masquer</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="Buttonrafraichir">
     <property name="geometry">
      <rect>
       <x>300</x>
@@ -122,7 +122,7 @@
      <string>Rafraichir</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="scanButton">
     <property name="geometry">
      <rect>
       <x>318</x>
@@ -135,7 +135,7 @@
      <string>Nouveau Scan</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
+   <widget class="QPushButton" name="quitButton">
     <property name="geometry">
      <rect>
       <x>420</x>
@@ -148,7 +148,7 @@
      <string>Quitter</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton">
+   <widget class="QRadioButton" name="radioWLButton">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -161,7 +161,7 @@
      <string>Liste Blanche</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_2">
+   <widget class="QRadioButton" name="radioBLButton">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -174,7 +174,7 @@
      <string>Liste Noire</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit">
+   <widget class="QLineEdit" name="zoneSaisie">
     <property name="geometry">
      <rect>
       <x>130</x>
@@ -197,20 +197,7 @@
      <number>24</number>
     </property>
    </widget>
-   <widget class="QToolButton" name="toolButton">
-    <property name="geometry">
-     <rect>
-      <x>340</x>
-      <y>280</y>
-      <width>101</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Inclure/exclure</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_6">
+   <widget class="QPushButton" name="ButtonOKinexclure">
     <property name="geometry">
      <rect>
       <x>450</x>
@@ -223,7 +210,7 @@
      <string>OK</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="labelprogressbar">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -236,7 +223,7 @@
      <string>Indexation des fichiers : </string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QLabel" name="labeletatamodifier">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -248,6 +235,26 @@
     <property name="text">
      <string>XX fichiers scannés, XX doublons supposés, dernier scan le DATE</string>
     </property>
+   </widget>
+   <widget class="QComboBox" name="comboBoxinclurexclure">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>280</y>
+      <width>87</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>inclure</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>exclure</string>
+     </property>
+    </item>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -281,5 +288,22 @@
   </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>quitButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>462</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>360</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
