@@ -6,8 +6,7 @@
 #include <fstream>
 
 Parcours::Parcours(string chemin) {
-    cout<<"Parcours::Parcours()\n"<<endl;
-    //cout<<chemin<<endl;
+	cout<<"Parcours::Parcours()\n"<<endl;
     ifstream config(chemin.c_str(), ios_base::in);
     if (config) {
 		string ligne;
@@ -17,7 +16,7 @@ Parcours::Parcours(string chemin) {
         // 2: on insère dans liste noire
         //cout<<"debut while : "<<endl;
 		while (getline(config, ligne)) {
-			if (ligne[0] != '#')
+			if (ligne[0] == '#')
 				continue;
 			if (mode == 0 && ligne != "listeblanche")
 				continue;
@@ -46,6 +45,7 @@ Parcours::Parcours(string chemin) {
 }
 
 path* Parcours::stringToPath(string toTransform) {
+	cout << "stringToPath : ";
 	if (toTransform[0] == '~') {
 		if (toTransform.length() == 1) {
 			toTransform=secure_getenv("HOME");
@@ -54,9 +54,11 @@ path* Parcours::stringToPath(string toTransform) {
 			toTransform.erase(toTransform.begin());
 			toTransform=secure_getenv("HOME")+toTransform;
 		}
+		cout << "dans ~ : *" << toTransform << "*";
 	}
 	else if (toTransform[0] != '/'){
 		toTransform=boost::filesystem::initial_path().string()+'/'+toTransform;
+		cout << "dans / : *" << toTransform << "*";
 	}
 	if (!exists(toTransform))
 		return 0;
@@ -136,6 +138,7 @@ void Parcours::runAll() {
 	 * On recommence jusqu'a pile vide
 	 *
 	 */
+	cout << "runAll" << endl;
 	Sql* mabase=Sql::getInstance();
 	mabase->sqlRaz();
 	map<string, path*>::iterator it=listeblanche.begin();

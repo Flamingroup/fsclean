@@ -100,8 +100,6 @@ char Sql::sqlInsert(const Fichier& f){
 		cerr << "Error occurred inserting." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		return -1;
 	}
-
-	db.commit();
 	db.close();
 	cout << "Fichier inséré ou MAJ sans erreurs" << endl;
 	return 0;

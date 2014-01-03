@@ -36,16 +36,11 @@ int main(int argc, char *argv[])
 //	mabase->sqlDelDeletedFiles();
 //	mabase->Affiche();
 
-	cout<<"Creation parcours"<<endl;
 	Parcours parc;
 	Sql* mabase=Sql::getInstance();
-	cout<<"runall sur parcours"<<endl;
 	parc.runAll();
-	cout<<"test whitelist"<<endl;
 	parc.voirWL();
-	cout<<"test blacklist"<<endl;
 	parc.voirBL();
-	cout<<"fin main"<<endl;
 	mabase->Affiche();
 	//tester avec test dans ./a dossier pour vérifier taille dossier
 	return 0;
