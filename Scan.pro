@@ -5,8 +5,9 @@
 #-------------------------------------------------
 
 QT       += core \
-            sql
-QT       -= gui
+            sql \
+	    widgets
+#QT       -= gui
 
 TARGET = Scan
 CONFIG   += console
@@ -25,8 +26,10 @@ HEADERS += \
     fichier.h \
     sql.h
 
-LIBS+=/usr/lib/x86_64-linux-gnu/libboost_system.so \
-    /usr/lib/x86_64-linux-gnu/libboost_filesystem.so \
+LIBS+=/usr/lib/i386-linux-gnu/libboost_filesystem.so \
+    /usr/lib/i386-linux-gnu/libboost_system.so \
+#    /usr/lib/x86_64-linux-gnu/libboost_system.so \
+#    /usr/lib/x86_64-linux-gnu/libboost_filesystem.so \
 	-ltomcrypt
 	
 OTHER_FILES += \
