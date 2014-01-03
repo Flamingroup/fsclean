@@ -20,7 +20,8 @@ int main(int argc, char *argv[])
     ///soon
     QApplication app(argc,argv);
     MainWindow fenetre;
-
+    //faire un préremplissage des listes
+    fenetre.displayInStatusBar("test de la statusbar");
     fenetre.show();
     return app.exec();
     /*Parcours parc;

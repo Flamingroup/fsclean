@@ -10,7 +10,9 @@ using namespace boost::filesystem;
 
 class Parcours
 {
-	private:
+    private:
+    string cheminFicCfg;
+    public:
 		/**
          * @brief listeblanche : liste des dossiers à scanner*/
          // todolisteblanche devrait etre une liste ce serait mieux
@@ -19,7 +21,7 @@ class Parcours
 		 * @brief listenoire : liste des sous dossiers de liste blanche à ne pas scanner
 		 */
 		map<string, path*> listenoire;
-	public:
+    //public:
 		/**
 		 * @brief Parcours
 		 * @param chemin : chemin du fichier contenant les paramètres de recherche des doublons
@@ -42,7 +44,9 @@ class Parcours
 		 */
 		void runAll();
 		void runFromPath(const pair<string, path *> & thePair);
-		bool isInBlacklist(const path &p);
+        bool isInBlacklist(const path &p);
+        void resetFicCfg();
+        void regenerateFicCfg();
 };
 
 #endif // FIND_H

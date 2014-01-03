@@ -5,7 +5,7 @@
 #include <string>
 #include <fstream>
 
-Parcours::Parcours(string chemin) {
+Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 	cout<<"Parcours::Parcours()\n"<<endl;
     ifstream config(chemin.c_str(), ios_base::in);
     if (config) {
@@ -108,6 +108,7 @@ void Parcours::addToBL(string chemin) {
 }
 
 void Parcours::rmvFromWL(string chemin) {
+    cout<<"rmvFromWL : "<<chemin<<endl;
 	path *tmp = stringToPath(chemin);
 	if (tmp == NULL) return;
 	map<string, path*>::iterator it=listeblanche.find(tmp->string());
@@ -188,4 +189,38 @@ bool Parcours::isInBlacklist(const path & p) {
 	return true;
 }
 
+void Parcours::resetFicCfg() {
+    cout<<"Parcours::resetFicCfg()\n"<<endl;
+    ofstream config(cheminFicCfg, ios_base::out);
+    if (config) {
+        config << "listeblanche" << endl
+               << "/home" << endl
+               << "/media" << endl
+               << "listenoire" << endl;
+        config.close();
+    }
+    else cout << "Erreur ouverture fichier config (" << "./config.cfg" << ")." << endl;
+    cout<<"fin Parcours::Parcours()"<<endl;
+}
 
+void Parcours::regenerateFicCfg() {
+    cout<<"Parcours::regenerateFicCfg()\n"<<endl;
+    ofstream config(cheminFicCfg, ios_base::out);
+    if (config) {
+        map<string, path*>::iterator it = listeblanche.begin();
+        map<string, path*>::iterator fin = listeblanche.end();
+        config<<"listeblanche"<<endl;
+        for(;it!=fin;it++){
+            config << (*it).first << endl;
+        }
+        it = listenoire.begin();
+        fin = listenoire.end();
+        config<<"listenoire"<<endl;
+        for(;it!=fin;it++){
+            config << (*it).first << endl;
+        }
+        config.close();
+    }
+    else cout << "Erreur ouverture fichier config (" << cheminFicCfg << ")." << endl;
+    cout<<"fin Parcours::regenerateFicCfg()"<<endl;
+}
