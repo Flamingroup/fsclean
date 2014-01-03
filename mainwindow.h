@@ -14,7 +14,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
+    void displayInStatusBar(const std::string & message);
 private slots:
     void on_scanButton_clicked();
 

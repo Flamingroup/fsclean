@@ -12,11 +12,13 @@ private :
 public:
 		static Sql* getInstance();
 		char sqlInsert(const Fichier &);
-		bool sqlDelete(Fichier);
 		void sqlDelDeletedFiles();
 		void sqlRaz();
 		bool sqlUpdate(Fichier);
-		void Affiche();
+        void Affiche();
+        bool sqlCreateMD5();
+        bool sqlDelete(Fichier &f);
+        bool sqlSetMd5(Fichier &f);
 };
 
 #endif // SQL_H

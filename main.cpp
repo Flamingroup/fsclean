@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
     ///soon
     QApplication app(argc,argv);
     MainWindow fenetre;
+
     fenetre.show();
     return app.exec();
     /*Parcours parc;

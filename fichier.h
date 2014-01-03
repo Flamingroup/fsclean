@@ -1,6 +1,8 @@
 #ifndef FICHIER_H
 #define FICHIER_H
-
+#include <QSqlQuery>
+#include <QString>
+#include <QVariant>
 #include <boost/filesystem.hpp>
 using namespace boost::filesystem;
 
@@ -30,7 +32,9 @@ class Fichier
 
 		void remplir(path p);
 		string trim(string s);
-		void voir();
+        void voir();
+        bool remplir(const QSqlQuery &query);
+        void calcMD5();
 };
 #endif // FICHIER_H
 

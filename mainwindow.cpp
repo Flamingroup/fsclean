@@ -19,3 +19,7 @@ void MainWindow::on_scanButton_clicked()
     Parcours parc;
     parc.runAll();
 }
+
+void MainWindow::displayInStatusBar(const std::string & message) {
+    statusBar()->showMessage(message.c_str());
+}

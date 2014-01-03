@@ -106,12 +106,6 @@ char Sql::sqlInsert(const Fichier& f){
 }
 
 
-bool Sql::sqlDelete(Fichier)
-{
-    //todo : suppression d'un fichier de la bdd
-    return false;
-}
-
 void Sql::sqlDelDeletedFiles() {
 	cout << "sqlDelDeletedFiles" << endl;
 	if (!db.open()) {
@@ -174,8 +168,66 @@ void Sql::Affiche(){
 	db.close();
 }
 
-bool Sql::sqlUpdate(Fichier)
-{
-    //todo : changement des caracs d'un fichier de la bdd (MD5 surtout)
+
+bool Sql::sqlSetMd5(Fichier& f) {
+    cout << "sqlSetMd5" << endl;
+    if (f.getid() == -1 && f.getMD5() != "") {
+        return false;
+    }
+    if (!db.open()) {
+        cerr << "Error occurred opening the database." << endl;
+        return false;
+    }
+    QSqlQuery query(db);
+    query.prepare("UPDATE Fichiers SET MD5 = :MD5 WHERE id = :id");
+    query.bindValue(":MD5", (QString)f.getMD5().c_str());
+    query.bindValue(":id", f.getid());
+    if (!query.exec()) {
+        cerr << "Error occurred while Updating the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+        return false;
+    }
+    db.close();
+    cout << "noerror" << endl;
+    return true;
+}
+
+bool Sql::sqlDelete(Fichier& f) {
+    if (f.getid() == -1) {
+        return false;
+    }
+    if (!db.open()) {
+        cerr << "Error occurred opening the database." << endl;
+        return false;
+    }
+    QSqlQuery query(db);
+    query.prepare("DETETE FROM Fichiers WHERE id = :id");
+    query.bindValue(":id", f.getid());
+    if (!query.exec()) {
+        cerr << "Error occurred while Deleting the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+        return false;
+    }
+    db.close();
+    cout << "noerror" << endl;
+    return false;
+}
+
+bool Sql::sqlCreateMD5(){
+    Fichier f;
+    if (!db.open()) {
+        cerr << "Error occurred opening the database." << endl;
+        return false;
+    }
+    QSqlQuery query(db);
+    query.prepare("SELECT * FROM Fichiers WHERE poids IN (SELECT poids FROM Fichiers WHERE 1 GROUP BY poids HAVING COUNT(poids)>1)");
+    if (!query.exec()) {
+        cerr << "Error occurred while Deleting the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+        return false;
+    }
+    while (query.next()) {
+        f.remplir(query);
+        sqlInsert(f);
+    }
+    db.close();
+    cout << "noerror" << endl;
     return false;
 }
