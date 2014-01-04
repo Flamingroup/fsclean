@@ -6,192 +6,329 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>536</width>
-    <height>429</height>
+    <width>679</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>FSCLEAN - le programme de votre vie!</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="3" column="1">
-     <widget class="QToolButton" name="lessWLButton">
-      <property name="cursor">
-       <cursorShape>PointingHandCursor</cursorShape>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>less icon.png</normaloff>less icon.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="4">
-     <widget class="QPushButton" name="Buttonmasquer">
-      <property name="cursor">
-       <cursorShape>PointingHandCursor</cursorShape>
-      </property>
-      <property name="text">
-       <string>Masquer</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0" colspan="5">
-     <widget class="QLabel" name="labelprogressbar">
-      <property name="text">
-       <string>Indexation des fichiers : </string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="9" colspan="2">
-     <widget class="QPushButton" name="quitButton">
-      <property name="text">
-       <string>Quitter</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="8">
-     <widget class="QToolButton" name="plusBLButton">
-      <property name="cursor">
-       <cursorShape>PointingHandCursor</cursorShape>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>plus icon.png</normaloff>plus icon.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QToolButton" name="WLplusButton">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>plus icon.png</normaloff>plus icon.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="6" colspan="3">
-     <widget class="QPushButton" name="scanButton">
-      <property name="text">
-       <string>Nouveau Scan</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="5">
-     <widget class="QLabel" name="labeldoublons">
-      <property name="text">
-       <string>Doublons</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0" rowspan="2" colspan="3">
-     <widget class="QListWidget" name="listwhiteList"/>
-    </item>
-    <item row="0" column="8" colspan="3">
-     <widget class="QLabel" name="labellistenoire">
-      <property name="text">
-       <string>Liste Noire</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="5">
-     <widget class="QPushButton" name="Buttonsupprimer">
-      <property name="cursor">
-       <cursorShape>PointingHandCursor</cursorShape>
-      </property>
-      <property name="text">
-       <string>Supprimer</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="4" colspan="4">
-     <widget class="QColumnView" name="listaffichageDoublons"/>
-    </item>
-    <item row="3" column="5">
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="2" column="6" colspan="2">
-     <widget class="QPushButton" name="Buttonrafraichir">
-      <property name="cursor">
-       <cursorShape>PointingHandCursor</cursorShape>
-      </property>
-      <property name="text">
-       <string>Rafraichir</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>Refresh Icon.jpg</normaloff>Refresh Icon.jpg</iconset>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="8" rowspan="2" colspan="3">
-     <widget class="QListWidget" name="listblackList"/>
-    </item>
-    <item row="3" column="3">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="labellisteblanche">
-      <property name="text">
-       <string>Liste Blanche</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="10">
-     <widget class="QToolButton" name="lessBLButton">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>less icon.png</normaloff>less icon.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0" colspan="6">
-     <widget class="QProgressBar" name="progressBar">
-      <property name="value">
-       <number>24</number>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>660</width>
+      <height>431</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_9">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QToolButton" name="WLplusButton">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>plus icon.png</normaloff>plus icon.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="lessWLButton">
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>less icon.png</normaloff>less icon.png</iconset>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="labellisteblanche">
+             <property name="text">
+              <string>Liste Blanche</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QListWidget" name="listblackList"/>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QToolButton" name="plusBLButton">
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>plus icon.png</normaloff>plus icon.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="lessBLButton">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>less icon.png</normaloff>less icon.png</iconset>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="labellistenoire">
+             <property name="text">
+              <string>Liste Noire</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QListWidget" name="listwhiteList"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="labeldoublons">
+             <property name="text">
+              <string>Doublons</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QColumnView" name="listaffichageDoublons"/>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QPushButton" name="Buttonmasquer">
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="text">
+                <string>Masquer</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="Buttonsupprimer">
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="text">
+                <string>Supprimer</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="Buttonrafraichir">
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="text">
+                <string>Rafraichir</string>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>Refresh Icon.jpg</normaloff>Refresh Icon.jpg</iconset>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_10">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <item>
+            <widget class="QLabel" name="labelprogressbar">
+             <property name="text">
+              <string>Indexation des fichiers : </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QProgressBar" name="progressBar">
+           <property name="value">
+            <number>24</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_8">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>10</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="scanButton">
+         <property name="text">
+          <string>Nouveau Scan</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <zorder>lessWLButton</zorder>
+   <zorder>Buttonmasquer</zorder>
+   <zorder>labelprogressbar</zorder>
+   <zorder>plusBLButton</zorder>
+   <zorder>WLplusButton</zorder>
+   <zorder>scanButton</zorder>
+   <zorder>labeldoublons</zorder>
+   <zorder>listwhiteList</zorder>
+   <zorder>labellistenoire</zorder>
+   <zorder>Buttonsupprimer</zorder>
+   <zorder>listaffichageDoublons</zorder>
+   <zorder>Buttonrafraichir</zorder>
+   <zorder>listblackList</zorder>
+   <zorder>labellisteblanche</zorder>
+   <zorder>lessBLButton</zorder>
+   <zorder>progressBar</zorder>
+   <zorder>labellistenoire</zorder>
+   <zorder>labeldoublons</zorder>
+   <zorder>listaffichageDoublons</zorder>
+   <zorder>horizontalSpacer</zorder>
+   <zorder>horizontalSpacer_2</zorder>
+   <zorder>horizontalSpacer_3</zorder>
+   <zorder>horizontalSpacer_4</zorder>
+   <zorder>horizontalSpacer_5</zorder>
+   <zorder>horizontalSpacer_6</zorder>
+   <zorder>horizontalSpacer_5</zorder>
+   <zorder>horizontalSpacer_7</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>536</width>
-     <height>25</height>
+     <width>679</width>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -216,22 +353,5 @@
   </action>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>quitButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>526</x>
-     <y>397</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>360</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
