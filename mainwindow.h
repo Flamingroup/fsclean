@@ -1,6 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
+#include "about.h"
 #include <QMainWindow>
 
 namespace Ui {
@@ -18,8 +18,6 @@ public:
 private slots:
     void on_scanButton_clicked();
 
-    void on_ButtonOKinexclure_clicked();
-
     void remplirWL();
     void remplirBL();
 
@@ -28,8 +26,15 @@ private slots:
     void on_lessBLButton_clicked();
     void on_actionReinitialiser_param_defaut_triggered();
 
+    void on_WLplusButton_clicked();
+
+    void on_plusBLButton_clicked();
+
+    void on_actionA_propos_triggered();
+
 private:
     Ui::MainWindow *ui;
+    About *popup;
 };
 
 #endif // MAINWINDOW_H

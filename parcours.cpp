@@ -45,6 +45,7 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 }
 
 path* Parcours::stringToPath(string toTransform) {
+    if(toTransform.length() == 0) return NULL;
 	cout << "stringToPath : ";
 	if (toTransform[0] == '~') {
 		if (toTransform.length() == 1) {
