@@ -4,7 +4,7 @@
 #include <QDialog>
 
 namespace Ui {
-class About;
+class about;
 }
 
 class About : public QDialog
@@ -16,7 +16,7 @@ public:
     ~About();
 
 private:
-    Ui::About *ui;
+	Ui::about *ui;
 };
 
 #endif // ABOUT_H

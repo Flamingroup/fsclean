@@ -45,6 +45,7 @@ class Parcours
 		void runAll();
 		void runFromPath(const pair<string, path *> & thePair);
         bool isInBlacklist(const path &p);
+		bool isHidden(const path & p);
         void resetFicCfg();
         void regenerateFicCfg();
 };

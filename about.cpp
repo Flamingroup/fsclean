@@ -3,7 +3,7 @@
 
 About::About(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::About)
+	ui(new Ui::about)
 {
     ui->setupUi(this);
 }

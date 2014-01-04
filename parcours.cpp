@@ -153,6 +153,7 @@ void Parcours::runAll() {
 }
 
 void Parcours::runFromPath(const pair<string, path*>& thePair) {
+	double i=0;
 	Sql* mabase=Sql::getInstance();
 	list<path*> directories;
     directories.push_back(new path(*thePair.second));
@@ -163,14 +164,24 @@ void Parcours::runFromPath(const pair<string, path*>& thePair) {
                 directory_iterator it(*directories.front());
                 directory_iterator end;
                 for (; it != end; ++it){
-					if(is_regular_file(*it) && !isInBlacklist(it->path())) {
-                        f.remplir(it->path());
+					if(is_regular_file(*it) && !isInBlacklist(it->path()) && !isHidden(it->path())) {
+						f.remplir(it->path());
 						mabase->sqlInsert(f);
+						++i;
                     }
-					else if(is_directory(*it) && !isInBlacklist(it->path())) {
+					else if(is_directory(*it) && !isInBlacklist(it->path()) && !isHidden(it->path())) {
                         directories.push_back(new path(it->path()));
                     }
-					else cout << directories.front()->string() << "exists, but not regular file nor directory or is in blacklist." << endl;
+					else {
+						cout << it->path().string();
+						if (isHidden(it->path())){
+							cout << " est un fichier caché." << endl;
+						}
+						if (isInBlacklist(it->path())){
+							cout << " est dans la black liste." << endl;
+						}
+						cout << " exists, but not regular file nor directory." << endl;
+					}
                 }
             }
         else cout << directories.front()->string() << "does not exist anymore" << endl;
@@ -182,10 +193,17 @@ void Parcours::runFromPath(const pair<string, path*>& thePair) {
     {
         cout << ex.what() << '\n';
     }
+	cout << "***************" << i << "*****************" << endl;
 }
 
 bool Parcours::isInBlacklist(const path & p) {
 	if (listenoire.find(p.string()) == listenoire.end())
+		return false;
+	return true;
+}
+
+bool Parcours::isHidden(const path& p) {
+	if (p.string().find("/.") == p.string().npos)
 		return false;
 	return true;
 }

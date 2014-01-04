@@ -18,15 +18,12 @@ using namespace std;
 int main(int argc, char *argv[])
 {  
     ///soon
-    QApplication app(argc,argv);
-    MainWindow fenetre;
-    fenetre.show();
-    return app.exec();
-    /*Parcours parc;
+	//QApplication app(argc,argv);
+	//MainWindow fenetre;
+	//fenetre.show();
+	//return app.exec();
+
+	Parcours parc;
 	parc.runAll();
-	parc.voirWL();
-	parc.voirBL();
-    Sql* mabase=Sql::getInstance();
-    mabase->Affiche();
-    return 0;*/
+	return 0;
 }
