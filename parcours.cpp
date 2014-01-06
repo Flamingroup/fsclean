@@ -18,6 +18,10 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 		while (getline(config, ligne)) {
 			if (ligne[0] == '#')
 				continue;
+			if (ligne == "scannercaches=1"){
+				scannercaches=true;
+				continue;
+			}
 			if (mode == 0 && ligne != "listeblanche")
 				continue;
 			if (mode == 0 && ligne == "listeblanche"){
@@ -27,26 +31,54 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 			if (mode == 1 && ligne != "listenoire") {
 				cout<<"listeBlanche mise à jour"<<endl;
 				addToWL(ligne);
+				continue;
 			}
 			if (mode == 1 && ligne == "listenoire") {
 				mode=2;
 				continue;
 			}
-			if (mode == 2 ) {
+			if (mode == 2 && ligne != "nombreapprox") {
                 cout<<"listeNoire mise à jour"<<endl;
                 addToBL(ligne);
+				continue;
 			}
+			if (mode == 2 && ligne == "nombreapprox") {
+				mode=3;
+				continue;
+			}
+			if (mode == 3 ) {
+				if (ligne == "0"){
+					countApprox();
+					continue;
+				}
+				else {
+					QString s=QString::fromStdString(ligne);
+					nombreapprox=s.toDouble();
+					continue;
+				}
+			}
+
 		}
         //cout<<"fin while"<<endl;
 		config.close();
 	}
 	else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
-    cout<<"fin Parcours::Parcours()"<<endl;
+	regenerateFicCfg();
+	cout<<"fin Parcours::Parcours() " << nombreapprox << endl;
 }
 
-path* Parcours::stringToPath(string toTransform) {
+void Parcours::countApprox() {
+	cout << "Count" << endl;
+	nombreapprox=0;
+	map<string, path*>::iterator it=listeblanche.begin();
+	map<string, path*>::iterator end=listeblanche.end();
+	for(; it!=end; ++it){
+		runFromPath(*it, true);
+	}
+}
+
+path* Parcours::stringToPath(string toTransform, bool verifExist) {
     if(toTransform.length() == 0) return NULL;
-	cout << "stringToPath : ";
 	if (toTransform[0] == '~') {
 		if (toTransform.length() == 1) {
 			toTransform=secure_getenv("HOME");
@@ -61,7 +93,7 @@ path* Parcours::stringToPath(string toTransform) {
 		toTransform=boost::filesystem::initial_path().string()+'/'+toTransform;
 		cout << "dans / : *" << toTransform << "*";
 	}
-	if (!exists(toTransform))
+	if (verifExist && !exists(toTransform))
 		return 0;
 	path *p=new path(toTransform);
 	*p=canonical(*p);
@@ -140,6 +172,7 @@ void Parcours::runAll() {
 	 * On recommence jusqu'a pile vide
 	 *
 	 */
+	nombreapprox=0;
 	cout << "runAll" << endl;
 	Sql* mabase=Sql::getInstance();
 	mabase->sqlRaz();
@@ -150,50 +183,43 @@ void Parcours::runAll() {
 		runFromPath(*it);
 	}
 	mabase->sqlDelDeletedFiles();
+	regenerateFicCfg();
 }
 
-void Parcours::runFromPath(const pair<string, path*>& thePair) {
+void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
 	double i=0;
 	Sql* mabase=Sql::getInstance();
 	list<path*> directories;
-    directories.push_back(new path(*thePair.second));
+	directories.push_back(new path(*thePair.second));
 	Fichier f;
-	try{
-        while(!directories.empty()){
-            if(exists(*directories.front())){
-                directory_iterator it(*directories.front());
-                directory_iterator end;
-                for (; it != end; ++it){
+	while(!directories.empty()){
+		try{
+			if(exists(*directories.front())){
+				directory_iterator it(*directories.front());
+				directory_iterator end;
+				for (; it != end; ++it){
 					if(is_regular_file(*it) && !isInBlacklist(it->path()) && !isHidden(it->path())) {
-						f.remplir(it->path());
-						mabase->sqlInsert(f);
+						if (!countOnly){
+							f.remplir(it->path());
+							mabase->sqlInsert(f);
+						}
 						++i;
-                    }
-					else if(is_directory(*it) && !isInBlacklist(it->path()) && !isHidden(it->path())) {
-                        directories.push_back(new path(it->path()));
-                    }
-					else {
-						cout << it->path().string();
-						if (isHidden(it->path())){
-							cout << " est un fichier caché." << endl;
-						}
-						if (isInBlacklist(it->path())){
-							cout << " est dans la black liste." << endl;
-						}
-						cout << " exists, but not regular file nor directory." << endl;
 					}
-                }
-            }
-        else cout << directories.front()->string() << "does not exist anymore" << endl;
-        delete directories.front();
-        directories.pop_front();
-        }
-    }
-    catch (const filesystem_error& ex)
-    {
-        cout << ex.what() << '\n';
-    }
-	cout << "***************" << i << "*****************" << endl;
+					else if(is_directory(*it) && !isInBlacklist(it->path()) && !isHidden(it->path())) {
+						directories.push_back(new path(it->path()));
+					}
+				}
+			}
+			delete directories.front();
+			directories.pop_front();
+		}
+		catch (const filesystem_error& ex)
+		{
+			delete directories.front();
+			directories.pop_front();
+		}
+	}
+	nombreapprox+=i;
 }
 
 bool Parcours::isInBlacklist(const path & p) {
@@ -209,37 +235,43 @@ bool Parcours::isHidden(const path& p) {
 }
 
 void Parcours::resetFicCfg() {
-    cout<<"Parcours::resetFicCfg()\n"<<endl;
-    ofstream config(cheminFicCfg, ios_base::out);
-    if (config) {
-        config << "listeblanche" << endl
-               << "/home" << endl
-               << "/media" << endl
-               << "listenoire" << endl;
-        config.close();
-    }
-    else cout << "Erreur ouverture fichier config (" << "./config.cfg" << ")." << endl;
-    cout<<"fin Parcours::Parcours()"<<endl;
+	cout<<"Parcours::resetFicCfg()\n"<<endl;
+	ofstream config(cheminFicCfg, ios_base::out);
+	if (config) {
+		config << "listeblanche" << endl
+			   << "/home" << endl
+			   << "/media" << endl
+			   << "listenoire" << endl
+			   << "nombreapprox" << endl
+			   << "0" << endl;
+		config.close();
+	}
+	else cout << "Erreur ouverture fichier config (" << "./config.cfg" << ")." << endl;
+	cout<<"fin Parcours::Parcours()"<<endl;
 }
 
 void Parcours::regenerateFicCfg() {
-    cout<<"Parcours::regenerateFicCfg()\n"<<endl;
-    ofstream config(cheminFicCfg, ios_base::out);
-    if (config) {
-        map<string, path*>::iterator it = listeblanche.begin();
-        map<string, path*>::iterator fin = listeblanche.end();
-        config<<"listeblanche"<<endl;
-        for(;it!=fin;it++){
-            config << (*it).first << endl;
-        }
-        it = listenoire.begin();
-        fin = listenoire.end();
-        config<<"listenoire"<<endl;
-        for(;it!=fin;it++){
-            config << (*it).first << endl;
-        }
-        config.close();
-    }
-    else cout << "Erreur ouverture fichier config (" << cheminFicCfg << ")." << endl;
-    cout<<"fin Parcours::regenerateFicCfg()"<<endl;
+	cout<<"Parcours::regenerateFicCfg()\n"<<endl;
+	ofstream config(cheminFicCfg, ios_base::out);
+	if (config) {
+		map<string, path*>::iterator it = listeblanche.begin();
+		map<string, path*>::iterator fin = listeblanche.end();
+		config<<"listeblanche"<<endl;
+		for(;it!=fin;it++){
+			config << (*it).first << endl;
+		}
+		it = listenoire.begin();
+		fin = listenoire.end();
+		config<<"listenoire"<<endl;
+		for(;it!=fin;it++){
+			config << (*it).first << endl;
+		}
+		config << "nombreapprox" << endl << nombreapprox << endl;
+		if(scannercaches){
+			cout << "scannercaches=1" << endl;
+		}
+		config.close();
+	}
+	else cout << "Erreur ouverture fichier config (" << cheminFicCfg << ")." << endl;
+	cout<<"fin Parcours::regenerateFicCfg()"<<endl;
 }

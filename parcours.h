@@ -11,7 +11,9 @@ using namespace boost::filesystem;
 class Parcours
 {
     private:
-    string cheminFicCfg;
+		string cheminFicCfg;
+		bool scannercaches=false;
+		double nombreapprox;
     public:
 		/**
          * @brief listeblanche : liste des dossiers à scanner*/
@@ -32,7 +34,7 @@ class Parcours
 		 * @param toTransform : chemin du fichier à transformer
 		 * @return
 		 */
-		static path* stringToPath(string toTransform);
+		static path* stringToPath(string toTransform, bool verifExist=true);
         void voirWL();
         void voirBL();
 		void addToWL(string chemin);
@@ -43,11 +45,12 @@ class Parcours
 		 * @brief executer : Lance le parcours et insert les fichiers dans la BDD au fur et à mesure.
 		 */
 		void runAll();
-		void runFromPath(const pair<string, path *> & thePair);
+		void runFromPath(const pair<string, path *> & thePair, bool countOnly=false);
         bool isInBlacklist(const path &p);
 		bool isHidden(const path & p);
         void resetFicCfg();
-        void regenerateFicCfg();
+		void regenerateFicCfg();
+		void countApprox();
 };
 
 #endif // FIND_H

@@ -20,16 +20,14 @@ SOURCES += main.cpp \
     fichier.cpp \
     sql.cpp \
     mainwindow.cpp \
-    about.cpp \
-    chrono.cpp
+    about.cpp
 
 HEADERS += \
     ./parcours.h \
     fichier.h \
     sql.h \
     mainwindow.h \
-    about.h \
-    chrono.hpp
+    about.h
 
 LIBS+=  /usr/lib/x86_64-linux-gnu/libboost_system.so \
         /usr/lib/x86_64-linux-gnu/libboost_filesystem.so \

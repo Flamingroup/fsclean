@@ -212,6 +212,7 @@ bool Sql::sqlDelete(Fichier& f) {
 }
 
 bool Sql::sqlCreateMD5(){
+	cout << "sqlCreateMD5" << endl;
     Fichier f;
     if (!db.open()) {
         cerr << "Error occurred opening the database." << endl;
@@ -224,8 +225,9 @@ bool Sql::sqlCreateMD5(){
         return false;
     }
     while (query.next()) {
-        f.remplir(query);
-        sqlInsert(f);
+		cout << "Un tour " << endl;
+		f.remplir(query);
+		sqlSetMd5(f);
     }
     db.close();
     cout << "noerror" << endl;
