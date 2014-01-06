@@ -44,27 +44,27 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
     cout<<"fin Parcours::Parcours()"<<endl;
 }
 
-path* Parcours::stringToPath(string toTransform) {
+path* Parcours::stringToPath(string toTransform, bool verifExist) {
     if(toTransform.length() == 0) return NULL;
-	cout << "stringToPath : ";
-	if (toTransform[0] == '~') {
-		if (toTransform.length() == 1) {
-			toTransform=secure_getenv("HOME");
-		}
-		else {
-			toTransform.erase(toTransform.begin());
-			toTransform=secure_getenv("HOME")+toTransform;
-		}
-		cout << "dans ~ : *" << toTransform << "*";
-	}
-	else if (toTransform[0] != '/'){
-		toTransform=boost::filesystem::initial_path().string()+'/'+toTransform;
-		cout << "dans / : *" << toTransform << "*";
-	}
-	if (!exists(toTransform))
-		return 0;
-	path *p=new path(toTransform);
-	*p=canonical(*p);
+    cout << "stringToPath : ";
+    if (toTransform[0] == '~') {
+        if (toTransform.length() == 1) {
+            toTransform=secure_getenv("HOME");
+        }
+        else {
+            toTransform.erase(toTransform.begin());
+            toTransform=secure_getenv("HOME")+toTransform;
+        }
+        cout << "dans ~ : *" << toTransform << "*";
+    }
+    else if (toTransform[0] != '/'){
+        toTransform=boost::filesystem::initial_path().string()+'/'+toTransform;
+        cout << "dans / : *" << toTransform << "*";
+    }
+    if (verifExist && !exists(toTransform))
+        return 0;
+    path *p=new path(toTransform);
+    *p=canonical(*p);
     return p;
 }
 

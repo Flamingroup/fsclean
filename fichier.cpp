@@ -5,8 +5,6 @@
 #include "parcours.h"
 #include <tomcrypt.h>
 #include <fstream>
-#include "chrono.hpp"
-
 
 using namespace boost::filesystem;
 
@@ -62,8 +60,6 @@ const string & Fichier::getfilenameTrime() const
 
 void Fichier::remplir(path p) {
 	//on nettoie le vieux fichier pour le réutiliser
-	benchmark::Chrono chr;
-	chr.start();
 	chemin.clear();
     MD5.clear();
 	filenameTrime.clear();
@@ -75,8 +71,6 @@ void Fichier::remplir(path p) {
     poids = file_size(p);
     dateModif = last_write_time(p);
     //attention si le fichier n'est pas un fichier certains champs ne seront pas corrects
-	chr.stop();
-	cout << "Remplir à partir du fichier a pris : " << chr.nsec() << "ns." << endl;
 }
 
 string Fichier::trim(string s)
@@ -100,8 +94,6 @@ void Fichier::voir()
 
 bool Fichier::remplir(const QSqlQuery& query)
 {   //on nettoie le vieux fichier pour le réutiliser
-	benchmark::Chrono chr;
-	chr.start();
 	chemin.clear();
     MD5.clear();
     filenameTrime.clear();
@@ -119,8 +111,6 @@ bool Fichier::remplir(const QSqlQuery& query)
     dateModif = query.value(4).toULongLong();
     calcMD5();
     return true;
-	chr.stop();
-	cout << "Remplir à partir de la bdd a pris : " << chr.nsec() << "ns." << endl;
 }
 
 void Fichier::calcMD5() {

@@ -32,6 +32,13 @@ private slots:
 
     void on_actionA_propos_triggered();
 
+
+    void on_Buttonrafraichir_clicked();
+
+    void on_Buttonsupprimer_clicked();
+
+    void on_Buttonmasquer_clicked();
+
 private:
     Ui::MainWindow *ui;
     About *popup;

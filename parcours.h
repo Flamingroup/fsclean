@@ -1,6 +1,7 @@
 #ifndef PARCOURS_H
 #define PARCOURS_H
 
+#include <QSqlQueryModel>
 #include <iostream>
 #include <map>
 using namespace std;
@@ -32,7 +33,7 @@ class Parcours
 		 * @param toTransform : chemin du fichier à transformer
 		 * @return
 		 */
-		static path* stringToPath(string toTransform);
+        static path* stringToPath(string toTransform, bool verifExist=true);
         void voirWL();
         void voirBL();
 		void addToWL(string chemin);
@@ -48,6 +49,8 @@ class Parcours
 		bool isHidden(const path & p);
         void resetFicCfg();
         void regenerateFicCfg();
+        //default behavior of sqlSelect : searching for duplicates
+        QSqlQueryModel *sqlSelect(string requete = "SELECT * FROM Fichiers WHERE MD5 IN (SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1)");
 };
 
 #endif // FIND_H
