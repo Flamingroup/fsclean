@@ -181,7 +181,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QColumnView" name="listaffichageDoublons"/>
+           <widget class="QTableView" name="TableAffichageDoublons"/>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -339,7 +339,7 @@
      <x>0</x>
      <y>0</y>
      <width>696</width>
-     <height>27</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">

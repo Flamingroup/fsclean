@@ -6,7 +6,6 @@
 #include <tomcrypt.h>
 #include <fstream>
 
-
 using namespace boost::filesystem;
 
 Fichier::Fichier()//path p): chemin(p)

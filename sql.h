@@ -2,7 +2,7 @@
 #define SQL_H
 #include <QSqlDatabase>
 #include "fichier.h"
-
+#include <QSqlQueryModel>
 
 class Sql {
 private :
@@ -19,6 +19,7 @@ public:
         bool sqlCreateMD5();
         bool sqlDelete(Fichier &f);
         bool sqlSetMd5(Fichier &f);
+        QSqlQueryModel *sqlSelect(string requete);
 };
 
 #endif // SQL_H

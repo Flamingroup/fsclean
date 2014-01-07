@@ -1,6 +1,7 @@
 #ifndef PARCOURS_H
 #define PARCOURS_H
 
+#include <QSqlQueryModel>
 #include <iostream>
 #include <map>
 using namespace std;
@@ -51,6 +52,7 @@ class Parcours
         void resetFicCfg();
 		void regenerateFicCfg();
 		void countApprox();
+        QSqlQueryModel *sqlSelect(string requete = "SELECT * FROM Fichiers WHERE MD5 IN (SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1)");
 };
 
 #endif // FIND_H

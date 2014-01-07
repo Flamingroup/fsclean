@@ -5,7 +5,10 @@
 #include <QString>
 #include <QMessageBox>
 #include <QFileDialog>
-
+#include <QSqlQueryModel>
+#include <list>
+#include <QModelIndex>
+#include <QModelIndexList>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -68,7 +71,8 @@ void MainWindow::on_lessWLButton_clicked()
         p.regenerateFicCfg();
         remplirWL();
     }
-    //todo : gérer le plantage si aucun élément selectionné(par défaut au début)
+    //todo : gérer suppression multiple
+
 }
 
 void MainWindow::on_lessBLButton_clicked()
@@ -83,6 +87,8 @@ void MainWindow::on_lessBLButton_clicked()
         p.regenerateFicCfg();
         remplirBL();
     }
+    //todo : gérer suppression multiple
+
 }
 
 
@@ -92,6 +98,7 @@ void MainWindow::on_actionReinitialiser_param_defaut_triggered()
     p.resetFicCfg();
     remplirBL();
     remplirWL();
+    on_Buttonrafraichir_clicked();
 }
 
 void MainWindow::on_WLplusButton_clicked()
@@ -129,4 +136,36 @@ void MainWindow::on_actionA_propos_triggered()
 {
     popup = new About(this);
     popup->show();
+}
+
+
+void MainWindow::on_Buttonrafraichir_clicked()
+{
+    static bool prem = false;
+    Sql* mabase=Sql::getInstance();
+    QSqlQueryModel *reponse = mabase->sqlSelect("SELECT chemin, filenametrime, poids, dateModif, MD5 FROM Fichiers");
+    if(prem){
+        ui->TableAffichageDoublons->selectAll();
+        QItemSelectionModel * table = ui->TableAffichageDoublons->selectionModel();
+        QModelIndexList indexes = table->selectedIndexes();
+        for(QModelIndex i :indexes)
+            ui->TableAffichageDoublons->showRow(i.row());
+        prem = true;
+    }
+    ui->TableAffichageDoublons->setModel(reponse);
+}
+
+void MainWindow::on_Buttonsupprimer_clicked()
+{
+    //todo : gérer suppression multiple
+}
+
+void MainWindow::on_Buttonmasquer_clicked()
+{
+    //done : gérer masquage multiple
+    QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
+    QModelIndexList indexes = lignes->selectedIndexes();
+    for(QModelIndex i :indexes)
+        ui->TableAffichageDoublons->hideRow(i.row());
+    //done : gérer dans rafraichir l'affichage de toutes les lignes
 }

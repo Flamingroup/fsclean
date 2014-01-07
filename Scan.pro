@@ -29,10 +29,11 @@ HEADERS += \
     mainwindow.h \
     about.h
 
-LIBS+=  /usr/lib/x86_64-linux-gnu/libboost_system.so \
-        /usr/lib/x86_64-linux-gnu/libboost_filesystem.so \
+LIBS+=  /usr/lib/i386-linux-gnu/libboost_system.so \
+        /usr/lib/i386-linux-gnu/libboost_filesystem.so \
 	-ltomcrypt
-	
+#/usr/lib/x86_64-linux-gnu/libboost_system.so \	
+
 OTHER_FILES += \
     config.cfg
 

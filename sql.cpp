@@ -1,5 +1,4 @@
 #include "sql.h"
-#include <QSqlQuery>
 #include <QVariant>
 #include <QString>
 #include <QSqlError>
@@ -232,4 +231,23 @@ bool Sql::sqlCreateMD5(){
     db.close();
     cout << "noerror" << endl;
     return false;
+}
+
+
+QSqlQueryModel* Sql::sqlSelect(string requete){
+    QSqlQueryModel* model = new QSqlQueryModel();
+    if (!db.open()) {
+        cerr << "Error occurred opening the database." << endl;
+        return 0;
+    }
+    QSqlQuery query(db);
+    query.prepare(QString::fromStdString(requete));
+    if (!query.exec()) {
+        cerr << "Error occurred while Deleting the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+        return 0;
+    }
+    model->setQuery(query);
+    db.close();
+    cout << "noerror" << endl;
+    return model;
 }
