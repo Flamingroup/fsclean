@@ -5,6 +5,7 @@
 #include "parcours.h"
 #include <tomcrypt.h>
 #include <fstream>
+#include <sstream>
 
 using namespace boost::filesystem;
 
@@ -119,17 +120,22 @@ void Fichier::calcMD5() {
     md5_init(&md);
     ifstream config(chemin.c_str(), ios_base::in);
     if (config) {
-        string ligne;
-        while (getline(config, ligne)) {
+		string ligne;
+		md5_process(&md, (const unsigned char*)ligne.c_str(), ligne.length());
+		while (getline(config, ligne)) {
 			/* add the message */
 			md5_process(&md, (const unsigned char*)ligne.c_str(), ligne.length());
-        }
+		}
         config.close();
-    }
+	}
     else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
-	unsigned char out[16];
+	stringstream test;
+	unsigned char out[15];
     /* get the hash in out[0..15] */
 	md5_done(&md, out);
 	//MD5=(const char *)out;
-	MD5="Truc chelou";
+	for (int b=0; b<16; ++b){
+		test << (int)out[b];
+	}
+	MD5=test.str();
 }
