@@ -9,6 +9,7 @@
 #include <list>
 #include <QModelIndex>
 #include <QModelIndexList>
+#include "thread.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -29,11 +30,14 @@ MainWindow::~MainWindow()
 void MainWindow::on_scanButton_clicked()
 {
     //todo ici inserer thread
-    Parcours parc;
-    parc.runAll();
+    Thread scan;
+    displayInStatusBar("Scan en cours...");
+    scan.start();
+    if(scan.isFinished())
+        displayInStatusBar("Scan terminé.");
+    //Parcours parc;
+    //parc.runAll();
     on_Buttonrafraichir_clicked();
-    //Sql* mabase=Sql::getInstance();
-    //mabase->Affiche();
 }
 
 void MainWindow::displayInStatusBar(const std::string & message) {
