@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     remplirWL();
     remplirBL();
+    on_Buttonrafraichir_clicked();
     displayInStatusBar("Ici, prochainement plein d'infos sur le scan.");
 }
 
@@ -27,10 +28,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_scanButton_clicked()
 {
+    //todo ici inserer thread
     Parcours parc;
     parc.runAll();
-    Sql* mabase=Sql::getInstance();
-    mabase->Affiche();
+    on_Buttonrafraichir_clicked();
+    //Sql* mabase=Sql::getInstance();
+    //mabase->Affiche();
 }
 
 void MainWindow::displayInStatusBar(const std::string & message) {
@@ -108,13 +111,15 @@ void MainWindow::on_WLplusButton_clicked()
     //            regen config
     //pe plus tard : test si scan en cours avant de modif config
     QString inclusion = QFileDialog::getExistingDirectory(this, "Ajouter au scan", "/", QFileDialog::ShowDirsOnly );
-    if(inclusion.length() > 0)
+    if(inclusion.length() > 0){
+        Parcours p;
+        p.addToWL(inclusion.toStdString());
+        p.regenerateFicCfg();
+        remplirWL();
+        inclusion+=" est maintenant dans la liste blanche.";
         QMessageBox::information(this, "Ajout dans la white list",inclusion);
-    cout<<"inclusion="<<inclusion.toStdString()<<endl;
-    Parcours p;
-    p.addToWL(inclusion.toStdString());
-    p.regenerateFicCfg();
-    remplirWL();
+    }
+
 }
 
 void MainWindow::on_plusBLButton_clicked()
@@ -123,13 +128,14 @@ void MainWindow::on_plusBLButton_clicked()
     //si existe : ajout
     //          regen config
     QString exclusion = QFileDialog::getExistingDirectory(this, "Bannir des scans", "/", QFileDialog::ShowDirsOnly );
-    if(exclusion.length() > 0)
+    if(exclusion.length() > 0){
+        Parcours p;
+        p.addToBL(exclusion.toStdString());
+        p.regenerateFicCfg();
+        remplirBL();
+        exclusion+=" est maintenant dans la liste noire.";
         QMessageBox::information(this, "Ajout dans la black list",exclusion);
-    cout<<"exclusion="<<exclusion.toStdString()<<endl;
-    Parcours p;
-    p.addToBL(exclusion.toStdString());
-    p.regenerateFicCfg();
-    remplirBL();
+    }
 }
 
 void MainWindow::on_actionA_propos_triggered()
@@ -141,18 +147,18 @@ void MainWindow::on_actionA_propos_triggered()
 
 void MainWindow::on_Buttonrafraichir_clicked()
 {
-    static bool prem = false;
+    static bool prem = true;
     Sql* mabase=Sql::getInstance();
     QSqlQueryModel *reponse = mabase->sqlSelect("SELECT chemin, filenametrime, poids, dateModif, MD5 FROM Fichiers");
-    if(prem){
+    if(! prem){
         ui->TableAffichageDoublons->selectAll();
         QItemSelectionModel * table = ui->TableAffichageDoublons->selectionModel();
         QModelIndexList indexes = table->selectedIndexes();
         for(QModelIndex i :indexes)
             ui->TableAffichageDoublons->showRow(i.row());
-        prem = true;
     }
     ui->TableAffichageDoublons->setModel(reponse);
+    prem = false;
 }
 
 void MainWindow::on_Buttonsupprimer_clicked()
