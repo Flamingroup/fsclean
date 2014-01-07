@@ -149,7 +149,7 @@ void MainWindow::on_Buttonrafraichir_clicked()
 {
     static bool prem = true;
     Sql* mabase=Sql::getInstance();
-    QSqlQueryModel *reponse = mabase->sqlSelect("SELECT chemin, filenametrime, poids, dateModif, MD5 FROM Fichiers");
+	QSqlQueryModel *reponse = mabase->sqlSelect();
     if(! prem){
         ui->TableAffichageDoublons->selectAll();
         QItemSelectionModel * table = ui->TableAffichageDoublons->selectionModel();

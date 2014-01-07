@@ -183,6 +183,7 @@ void Parcours::runAll() {
 		runFromPath(*it);
 	}
 	mabase->sqlDelDeletedFiles();
+	mabase->sqlCreateMD5();
 	regenerateFicCfg();
 }
 
@@ -242,6 +243,9 @@ void Parcours::resetFicCfg() {
 			   << "/home" << endl
 			   << "/media" << endl
 			   << "listenoire" << endl
+			   << "/proc" << endl
+			   << "/boot" << endl
+			   << "/etc" << endl
 			   << "nombreapprox" << endl
 			   << "0" << endl;
 		config.close();

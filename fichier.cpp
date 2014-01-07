@@ -14,6 +14,21 @@ Fichier::Fichier()//path p): chemin(p)
     id=-1;
 }
 
+Fichier::Fichier(QSqlQuery& query)//path p): chemin(p)
+{
+	//on remplit
+	id=query.value(0).toUInt();
+	path* p=Parcours::stringToPath(query.value(1).toString().toStdString()); // si segfault : faire par copie
+	if (p == NULL)
+		throw 1;
+	chemin=(*p);
+	delete p;
+	filenameTrime = query.value(2).toString().toStdString();
+	poids = query.value(3).toULongLong();
+	dateModif = query.value(4).toULongLong();
+	calcMD5();
+}
+
 const u_int32_t &Fichier::getDateModif() const
 {
     return dateModif;

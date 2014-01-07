@@ -19,7 +19,8 @@ class Fichier
 		string MD5; //ne pas remplir pour tous les fichiers
         //bool verifToujoursExistant
 	public:
-        Fichier();
+		Fichier();
+		Fichier(QSqlQuery&);
 		void setid(int i);
 		int getid() const;
 		const path& getChemin() const;
