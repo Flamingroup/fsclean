@@ -6,7 +6,7 @@
 #include <fstream>
 
 Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
-	cout<<"Parcours::Parcours()\n"<<endl;
+    cout<<"Parcours::Parcours()"<<endl;
     ifstream config(chemin.c_str(), ios_base::in);
     if (config) {
 		string ligne;
@@ -48,12 +48,13 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 			}
 			if (mode == 3 ) {
 				if (ligne == "0"){
+                    nbApprox=0;
 					countApprox();
 					continue;
 				}
 				else {
 					QString s=QString::fromStdString(ligne);
-					nombreapprox=s.toDouble();
+                    nbApprox=s.toDouble();
 					continue;
 				}
 			}
@@ -64,12 +65,12 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 	}
 	else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
 	regenerateFicCfg();
-	cout<<"fin Parcours::Parcours() " << nombreapprox << endl;
+    cout<<"fin Parcours::Parcours() " << nbApprox << endl;
 }
 
 void Parcours::countApprox() {
-	cout << "Count" << endl;
-	nombreapprox=0;
+    cout << "Parcours::CountApprox" << endl;
+    nbApprox=0;
 	map<string, path*>::iterator it=listeblanche.begin();
 	map<string, path*>::iterator end=listeblanche.end();
 	for(; it!=end; ++it){
@@ -87,7 +88,7 @@ path* Parcours::stringToPath(string toTransform, bool verifExist) {
 			toTransform.erase(toTransform.begin());
 			toTransform=secure_getenv("HOME")+toTransform;
 		}
-		cout << "dans ~ : *" << toTransform << "*";
+        cout << "dans ~ : *" << toTransform << "*";
 	}
 	else if (toTransform[0] != '/'){
 		toTransform=boost::filesystem::initial_path().string()+'/'+toTransform;
@@ -153,6 +154,7 @@ void Parcours::rmvFromWL(string chemin) {
 }
 
 void Parcours::rmvFromBL(string chemin) {
+    cout<<"rmvFromBL : "<<chemin<<endl;
 	path *tmp = stringToPath(chemin);
 	if (tmp == NULL) return;
 	map<string, path*>::iterator it=listenoire.find(tmp->string());
@@ -172,8 +174,8 @@ void Parcours::runAll() {
 	 * On recommence jusqu'a pile vide
 	 *
 	 */
-	nombreapprox=0;
-	cout << "runAll" << endl;
+    nbApprox=0;
+    cout << "Parcours::runAll()" << endl;
 	Sql* mabase=Sql::getInstance();
 	mabase->sqlRaz();
 	map<string, path*>::iterator it=listeblanche.begin();
@@ -188,8 +190,11 @@ void Parcours::runAll() {
 }
 
 void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
-	double i=0;
-	Sql* mabase=Sql::getInstance();
+    cout<<"Parcours::runFromPath()"<<endl;
+    Sql* mabase;
+    if (!countOnly){
+        mabase=Sql::getInstance();
+    }
 	list<path*> directories;
 	directories.push_back(new path(*thePair.second));
 	Fichier f;
@@ -204,7 +209,7 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
 							f.remplir(it->path());
 							mabase->sqlInsert(f);
 						}
-						++i;
+                        ++nbApprox;
 					}
 					else if(is_directory(*it) && !isInBlacklist(it->path()) && !isHidden(it->path())) {
 						directories.push_back(new path(it->path()));
@@ -220,7 +225,6 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
 			directories.pop_front();
 		}
 	}
-	nombreapprox+=i;
 }
 
 bool Parcours::isInBlacklist(const path & p) {
@@ -270,7 +274,7 @@ void Parcours::regenerateFicCfg() {
 		for(;it!=fin;it++){
 			config << (*it).first << endl;
 		}
-		config << "nombreapprox" << endl << nombreapprox << endl;
+        config << "nombreapprox" << endl << nbApprox << endl;
 		if(scannercaches){
 			cout << "scannercaches=1" << endl;
 		}

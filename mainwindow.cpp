@@ -10,43 +10,60 @@
 #include <QModelIndex>
 #include <QModelIndexList>
 #include "thread.h"
+#include <sstream>
+#include "parcours.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    scan = new Thread;
+    Parcours p;
+    ostringstream os;
     ui->setupUi(this);
-    remplirWL();
-    remplirBL();
-    on_Buttonrafraichir_clicked();
-    displayInStatusBar("Ici, prochainement plein d'infos sur le scan.");
+    cout<<"Initialisation GUI"<<endl;
+    remplirWL(p);
+    remplirBL(p);
+    on_Buttonrafraichir_clicked();   
+    os<<p.getNbApprox();
+    string str = os.str();
+    str+=" fichier(s) en base de données.";
+    displayInStatusBar(str);
+    cout<<"FIN Initialisation GUI\n"<<endl;
+
 }
 
 MainWindow::~MainWindow()
 {
+    delete scan;
     delete ui;
 }
 
 void MainWindow::on_scanButton_clicked()
 {
     //todo ici inserer thread
-    Thread scan;
-    displayInStatusBar("Scan en cours...");
-    scan.start();
-    if(scan.isFinished())
-        displayInStatusBar("Scan terminé.");
+    cout<<"lancement thread.."<<endl;
+    scan->start();
+    if(scan->isRunning()){
+        cout<<"thread running dans scan_button, l'autre flux d'exec continue"<<endl;
+        displayInStatusBar("Scan en cours...");
+    }
+    //ou mettre isFinished? il n'y a qu'un thread, comment reset son etat?
+    //if(scan->isFinished()){
+    //    cout<<"le thread a terminé."<<endl;
+    //    displayInStatusBar("Scan terminé.");
+    //}
     //Parcours parc;
     //parc.runAll();
-    on_Buttonrafraichir_clicked();
+    //on_Buttonrafraichir_clicked();
 }
 
 void MainWindow::displayInStatusBar(const std::string & message) {
     statusBar()->showMessage(message.c_str());
 }
 
-void MainWindow::remplirWL()
+void MainWindow::remplirWL(Parcours &remplir)
 {
-    Parcours remplir;
     map<string, path*>::iterator it = remplir.listeblanche.begin();
     map<string, path*>::iterator fin = remplir.listeblanche.end();
     ui->listwhiteList->clear();//on nettoie avant de remplir
@@ -55,9 +72,8 @@ void MainWindow::remplirWL()
     }
 }
 
-void MainWindow::remplirBL()
+void MainWindow::remplirBL(Parcours &remplir)
 {
-    Parcours remplir;
     map<string, path*>::iterator it = remplir.listenoire.begin();
     map<string, path*>::iterator fin = remplir.listenoire.end();
     ui->listblackList->clear();//on nettoie avant de remplir
@@ -76,7 +92,7 @@ void MainWindow::on_lessWLButton_clicked()
         Parcours p;
         p.rmvFromWL(s.toStdString());
         p.regenerateFicCfg();
-        remplirWL();
+        remplirWL(p);
     }
     //todo : gérer suppression multiple
 
@@ -92,7 +108,7 @@ void MainWindow::on_lessBLButton_clicked()
         Parcours p;
         p.rmvFromBL(s.toStdString());
         p.regenerateFicCfg();
-        remplirBL();
+        remplirBL(p);
     }
     //todo : gérer suppression multiple
 
@@ -103,8 +119,8 @@ void MainWindow::on_actionReinitialiser_param_defaut_triggered()
 {
     Parcours p;
     p.resetFicCfg();
-    remplirBL();
-    remplirWL();
+    remplirBL(p);
+    remplirWL(p);
     on_Buttonrafraichir_clicked();
 }
 
@@ -119,7 +135,7 @@ void MainWindow::on_WLplusButton_clicked()
         Parcours p;
         p.addToWL(inclusion.toStdString());
         p.regenerateFicCfg();
-        remplirWL();
+        remplirWL(p);
         inclusion+=" est maintenant dans la liste blanche.";
         QMessageBox::information(this, "Ajout dans la white list",inclusion);
     }
@@ -136,7 +152,7 @@ void MainWindow::on_plusBLButton_clicked()
         Parcours p;
         p.addToBL(exclusion.toStdString());
         p.regenerateFicCfg();
-        remplirBL();
+        remplirBL(p);
         exclusion+=" est maintenant dans la liste noire.";
         QMessageBox::information(this, "Ajout dans la black list",exclusion);
     }
@@ -151,6 +167,7 @@ void MainWindow::on_actionA_propos_triggered()
 
 void MainWindow::on_Buttonrafraichir_clicked()
 {
+    cout<<"rafraichir_button"<<endl;
     static bool prem = true;
     Sql* mabase=Sql::getInstance();
 	QSqlQueryModel *reponse = mabase->sqlSelect();

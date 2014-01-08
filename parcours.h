@@ -14,7 +14,7 @@ class Parcours
     private:
 		string cheminFicCfg;
 		bool scannercaches=false;
-		double nombreapprox;
+        double nbApprox;
     public:
 		/**
          * @brief listeblanche : liste des dossiers à scanner*/
@@ -39,7 +39,8 @@ class Parcours
         void voirWL();
         void voirBL();
 		void addToWL(string chemin);
-		void addToBL(string chemin);
+        void addToBL(string chemin);
+        const double& getNbApprox()const{return nbApprox;}
 		void rmvFromWL(string chemin);
 		void rmvFromBL(string chemin);
 		/**

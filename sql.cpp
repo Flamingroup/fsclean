@@ -68,7 +68,7 @@ char Sql::sqlInsert(const Fichier& f){
 	}
 	if (query.next()) {
 		if (f.getDateModif() != (quint32)query.value(4).toULongLong() || f.getPoids() != (quint64)query.value(3).toULongLong()) {
-			cout << "Supression des anciens fichiers" << endl;
+            //cout << "Supression des anciens fichiers" << endl;
 			QSqlQuery query2(db);
 			query2.prepare("DELETE FROM Fichiers WHERE id = :id");
 			query2.bindValue(":id", query.value(0).toInt());
@@ -85,7 +85,7 @@ char Sql::sqlInsert(const Fichier& f){
 				cerr << "Error occurred while RAZing the flag." << query2.lastError().driverText().toStdString() << " " << query2.lastQuery().toStdString() << endl;
 				return -1;
 			}
-			cout << "Rien à faire, fichier déjà dans la base" << endl;
+            //cout << "Rien à faire, fichier déjà dans la base" << endl;
 			db.close();
 			return 0;
 		}
@@ -100,7 +100,7 @@ char Sql::sqlInsert(const Fichier& f){
 		return -1;
 	}
 	db.close();
-	cout << "Fichier inséré ou MAJ sans erreurs" << endl;
+    //cout << "Fichier inséré ou MAJ sans erreurs" << endl;
 	return 0;
 }
 
@@ -118,7 +118,7 @@ void Sql::sqlDelDeletedFiles() {
 		return;
 	}
 	db.close();
-	cout << "noerror" << endl;
+    //cout << "noerror" << endl;
 }
 
 void Sql::sqlRaz() {
@@ -134,7 +134,7 @@ void Sql::sqlRaz() {
 		return;
 	}
 	db.close();
-	cout << "noerror" << endl;
+    //cout << "noerror" << endl;
 }
 
 void Sql::Affiche(){
@@ -186,11 +186,12 @@ bool Sql::sqlSetMd5(Fichier& f) {
         return false;
     }
     db.close();
-    cout << "noerror" << endl;
+    //cout << "noerror" << endl;
     return true;
 }
 
 bool Sql::sqlDelete(Fichier& f) {
+    cout<<"Sql::sqlDelete"<<endl;
     if (f.getid() == -1) {
         return false;
     }
@@ -206,12 +207,12 @@ bool Sql::sqlDelete(Fichier& f) {
         return false;
     }
     db.close();
-    cout << "noerror" << endl;
+    //cout << "noerror" << endl;
     return false;
 }
 
 bool Sql::sqlCreateMD5(){
-	cout << "sqlCreateMD5" << endl;
+    cout << "sql::sqlCreateMD5" << endl;
 	list<Fichier*> lf;
     if (!db.open()) {
         cerr << "Error occurred opening the database." << endl;
@@ -224,7 +225,7 @@ bool Sql::sqlCreateMD5(){
         return false;
     }
     while (query.next()) {
-		cout << "Un tour " << endl;
+        //cout << "Un tour " << endl;
 		lf.push_back(new Fichier(query));
     }
 	list<Fichier*>::iterator it=lf.begin();
@@ -234,12 +235,13 @@ bool Sql::sqlCreateMD5(){
 		it=lf.erase(it);
 	}
     db.close();
-    cout << "noerror" << endl;
+    //cout << "noerror" << endl;
     return false;
 }
 
 
 QSqlQueryModel* Sql::sqlSelect(string requete){
+    cout<<"sql::sqlSelect"<<endl;
     QSqlQueryModel* model = new QSqlQueryModel();
     if (!db.open()) {
         cerr << "Error occurred opening the database." << endl;
@@ -253,6 +255,6 @@ QSqlQueryModel* Sql::sqlSelect(string requete){
     }
     model->setQuery(query);
     db.close();
-    cout << "noerror" << endl;
+    //cout << "noerror" << endl;
     return model;
 }

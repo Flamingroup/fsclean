@@ -8,6 +8,8 @@ Thread::Thread()
 
 void Thread::run()
 {
-    Parcours p;
-    p.runAll();
+    cout<<"debut thread"<<endl;
+    //Parcours p;
+    //p.runAll();
+    cout<<"fin thread"<<endl;
 }

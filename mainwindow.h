@@ -2,7 +2,8 @@
 #define MAINWINDOW_H
 #include "about.h"
 #include <QMainWindow>
-
+#include "thread.h"
+#include "parcours.h"
 namespace Ui {
 class MainWindow;
 }
@@ -15,11 +16,12 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void displayInStatusBar(const std::string & message);
+    Thread * scan;
 private slots:
     void on_scanButton_clicked();
 
-    void remplirWL();
-    void remplirBL();
+    void remplirWL(Parcours &remplir);
+    void remplirBL(Parcours &remplir);
 
     void on_lessWLButton_clicked();
 
