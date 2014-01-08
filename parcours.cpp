@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 
+int Parcours::AVANCE = 0;
 Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
     cout<<"Parcours::Parcours()"<<endl;
     ifstream config(chemin.c_str(), ios_base::in);
@@ -55,6 +56,7 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 				else {
 					QString s=QString::fromStdString(ligne);
                     nbApprox=s.toDouble();
+					AVANCE=100;
 					continue;
 				}
 			}
@@ -64,6 +66,7 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 		config.close();
 	}
 	else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
+	denom=nbApprox;
 	regenerateFicCfg();
     cout<<"fin Parcours::Parcours() " << nbApprox << endl;
 }
@@ -174,7 +177,8 @@ void Parcours::runAll() {
 	 * On recommence jusqu'a pile vide
 	 *
 	 */
-    nbApprox=0;
+	nbApprox=0;
+	AVANCE = (nbApprox/denom)*100;
     cout << "Parcours::runAll()" << endl;
 	Sql* mabase=Sql::getInstance();
 	mabase->sqlRaz();
@@ -210,6 +214,7 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
 							mabase->sqlInsert(f);
 						}
                         ++nbApprox;
+						AVANCE =(nbApprox/denom)*100;
 					}
 					else if(is_directory(*it) && !isInBlacklist(it->path()) && !isHidden(it->path())) {
 						directories.push_back(new path(it->path()));

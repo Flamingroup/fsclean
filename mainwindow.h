@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "thread.h"
 #include "parcours.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -16,7 +17,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void displayInStatusBar(const std::string & message);
+	void displayNbInStatusBar(Parcours &p);
     Thread * scan;
+	QTimer *timer;
+public slots:
+	void setProgress();
 private slots:
     void on_scanButton_clicked();
 
@@ -26,6 +31,7 @@ private slots:
     void on_lessWLButton_clicked();
 
     void on_lessBLButton_clicked();
+
     void on_actionReinitialiser_param_defaut_triggered();
 
     void on_WLplusButton_clicked();
@@ -35,7 +41,7 @@ private slots:
     void on_actionA_propos_triggered();
 
 
-    void on_Buttonrafraichir_clicked();
+	void on_Buttonrafraichir_clicked();
 
     void on_Buttonsupprimer_clicked();
 
@@ -43,7 +49,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    About *popup;
+	About *popup;
 };
 
 #endif // MAINWINDOW_H

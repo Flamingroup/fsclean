@@ -15,7 +15,9 @@ class Parcours
 		string cheminFicCfg;
 		bool scannercaches=false;
         double nbApprox;
+		double denom;
     public:
+		static int AVANCE;
 		/**
          * @brief listeblanche : liste des dossiers à scanner*/
          // todolisteblanche devrait etre une liste ce serait mieux
@@ -40,7 +42,7 @@ class Parcours
         void voirBL();
 		void addToWL(string chemin);
         void addToBL(string chemin);
-        const double& getNbApprox()const{return nbApprox;}
+		const double& getNbApprox(){countApprox();return nbApprox;}
 		void rmvFromWL(string chemin);
 		void rmvFromBL(string chemin);
 		/**
@@ -55,5 +57,6 @@ class Parcours
 		void countApprox();
         QSqlQueryModel *sqlSelect(string requete = "SELECT * FROM Fichiers WHERE MD5 IN (SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1)");
 };
+
 
 #endif // FIND_H

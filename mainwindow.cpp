@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_interface.h"
 #include "parcours.h"
 #include "sql.h"
@@ -12,6 +12,7 @@
 #include "thread.h"
 #include <sstream>
 #include "parcours.h"
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -19,47 +20,70 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     scan = new Thread;
     Parcours p;
-    ostringstream os;
     ui->setupUi(this);
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(setProgress()));
+	timer->start(100);
     cout<<"Initialisation GUI"<<endl;
     remplirWL(p);
-    remplirBL(p);
-    on_Buttonrafraichir_clicked();   
-    os<<p.getNbApprox();
-    string str = os.str();
-    str+=" fichier(s) en base de données.";
-    displayInStatusBar(str);
+	remplirBL(p);
+	displayNbInStatusBar(p);
+	ui->progressBar->setValue(Parcours::AVANCE);
+	on_Buttonrafraichir_clicked();
     cout<<"FIN Initialisation GUI\n"<<endl;
 
 }
 
 MainWindow::~MainWindow()
 {
-    delete scan;
+	if (scan != NULL){
+		delete scan;
+	}
     delete ui;
+	delete timer;
 }
 
 void MainWindow::on_scanButton_clicked()
 {
     //todo ici inserer thread
     cout<<"lancement thread.."<<endl;
-    scan->start();
+	if (scan == NULL){
+		scan=new Thread;
+	}//normalement else inutile
+	else scan->quit();
+	scan->start();
     if(scan->isRunning()){
         cout<<"thread running dans scan_button, l'autre flux d'exec continue"<<endl;
         displayInStatusBar("Scan en cours...");
     }
     //ou mettre isFinished? il n'y a qu'un thread, comment reset son etat?
-    //if(scan->isFinished()){
-    //    cout<<"le thread a terminé."<<endl;
-    //    displayInStatusBar("Scan terminé.");
-    //}
-    //Parcours parc;
-    //parc.runAll();
-    //on_Buttonrafraichir_clicked();
+	if (!scan->isRunning()){
+		delete scan;
+		scan=NULL;
+	}
 }
 
 void MainWindow::displayInStatusBar(const std::string & message) {
-    statusBar()->showMessage(message.c_str());
+	statusBar()->showMessage(message.c_str());
+}
+
+void MainWindow::displayNbInStatusBar(Parcours& p)
+{
+	ostringstream os;
+	os<<p.getNbApprox();
+	string str = os.str();
+	str+=" fichier(s) en base de donnees.";
+	displayInStatusBar(str);
+}
+
+void MainWindow::setProgress()
+{
+	//normalement la valeur est toujours entre 0 et 100
+	if(Parcours::AVANCE > 100)
+		Parcours::AVANCE = 100;
+	else if(Parcours::AVANCE < 0)
+		Parcours::AVANCE = 0;
+	ui->progressBar->setValue(Parcours::AVANCE);
 }
 
 void MainWindow::remplirWL(Parcours &remplir)
@@ -93,9 +117,8 @@ void MainWindow::on_lessWLButton_clicked()
         p.rmvFromWL(s.toStdString());
         p.regenerateFicCfg();
         remplirWL(p);
+		displayNbInStatusBar(p);
     }
-    //todo : gérer suppression multiple
-
 }
 
 void MainWindow::on_lessBLButton_clicked()
@@ -109,9 +132,8 @@ void MainWindow::on_lessBLButton_clicked()
         p.rmvFromBL(s.toStdString());
         p.regenerateFicCfg();
         remplirBL(p);
+		displayNbInStatusBar(p);
     }
-    //todo : gérer suppression multiple
-
 }
 
 
@@ -138,6 +160,7 @@ void MainWindow::on_WLplusButton_clicked()
         remplirWL(p);
         inclusion+=" est maintenant dans la liste blanche.";
         QMessageBox::information(this, "Ajout dans la white list",inclusion);
+		displayNbInStatusBar(p);
     }
 
 }
@@ -155,6 +178,7 @@ void MainWindow::on_plusBLButton_clicked()
         remplirBL(p);
         exclusion+=" est maintenant dans la liste noire.";
         QMessageBox::information(this, "Ajout dans la black list",exclusion);
+		displayNbInStatusBar(p);
     }
 }
 
@@ -180,6 +204,10 @@ void MainWindow::on_Buttonrafraichir_clicked()
     }
     ui->TableAffichageDoublons->setModel(reponse);
     prem = false;
+	if(scan->isFinished() || scan == NULL){
+		cout<<"le thread a terminé."<<endl;
+		displayInStatusBar("Scan termine.");
+	}
 }
 
 void MainWindow::on_Buttonsupprimer_clicked()

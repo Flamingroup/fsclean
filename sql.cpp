@@ -87,6 +87,7 @@ char Sql::sqlInsert(const Fichier& f){
 			}
             //cout << "Rien à faire, fichier déjà dans la base" << endl;
 			db.close();
+			cout << "noerror" << endl;
 			return 0;
 		}
 	}
@@ -101,6 +102,7 @@ char Sql::sqlInsert(const Fichier& f){
 	}
 	db.close();
     //cout << "Fichier inséré ou MAJ sans erreurs" << endl;
+	cout << "noerror" << endl;
 	return 0;
 }
 
@@ -134,7 +136,7 @@ void Sql::sqlRaz() {
 		return;
 	}
 	db.close();
-    //cout << "noerror" << endl;
+	cout << "noerror" << endl;
 }
 
 void Sql::Affiche(){
@@ -145,7 +147,7 @@ void Sql::Affiche(){
 	}
 	QSqlQuery qry(db);
 	if (!qry.exec("SELECT * FROM Fichiers")) {
-		cerr << "Error occurred inserting." << qry.lastError().driverText().toStdString() << " " << qry.lastQuery().toStdString() << endl;
+		cerr << "Error occurred Affiching the database." << qry.lastError().driverText().toStdString() << " " << qry.lastQuery().toStdString() << endl;
 		return;
 	}
 	while (qry.next()) {
