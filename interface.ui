@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>696</width>
-    <height>448</height>
+    <height>459</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -285,8 +285,14 @@
           </item>
           <item>
            <widget class="QProgressBar" name="progressBar">
+            <property name="maximumSize">
+             <size>
+              <width>542</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="value">
-             <number>24</number>
+             <number>0</number>
             </property>
            </widget>
           </item>
@@ -307,6 +313,34 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="LED">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>64</width>
+            <height>64</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>64</width>
+            <height>64</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap>green.png</pixmap>
+          </property>
+         </widget>
         </item>
         <item alignment="Qt::AlignBottom">
          <widget class="QPushButton" name="scanButton">

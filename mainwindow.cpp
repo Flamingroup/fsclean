@@ -21,17 +21,18 @@ MainWindow::MainWindow(QWidget *parent) :
     scan = new Thread;
     Parcours p;
     ui->setupUi(this);
+    ui->LED->setScaledContents(true);
 	timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(setProgress()));
-	timer->start(100);
+    connect(scan,SIGNAL(scanFinished()),this,SLOT(FinScan()));
+    timer->start(100);
     cout<<"Initialisation GUI"<<endl;
     remplirWL(p);
 	remplirBL(p);
-	displayNbInStatusBar(p);
+    displayNbElemBDDInStatusBar(p);
 	ui->progressBar->setValue(Parcours::AVANCE);
 	on_Buttonrafraichir_clicked();
     cout<<"FIN Initialisation GUI\n"<<endl;
-
 }
 
 MainWindow::~MainWindow()
@@ -51,9 +52,9 @@ void MainWindow::on_scanButton_clicked()
 		scan=new Thread;
 	}//normalement else inutile
 	else scan->quit();
+    setLEDRed();
 	scan->start();
     if(scan->isRunning()){
-        cout<<"thread running dans scan_button, l'autre flux d'exec continue"<<endl;
         displayInStatusBar("Scan en cours...");
     }
     //ou mettre isFinished? il n'y a qu'un thread, comment reset son etat?
@@ -67,7 +68,7 @@ void MainWindow::displayInStatusBar(const std::string & message) {
 	statusBar()->showMessage(message.c_str());
 }
 
-void MainWindow::displayNbInStatusBar(Parcours& p)
+void MainWindow::displayNbElemBDDInStatusBar(Parcours& p)
 {
 	ostringstream os;
 	os<<p.getNbApprox();
@@ -83,7 +84,29 @@ void MainWindow::setProgress()
 		Parcours::AVANCE = 100;
 	else if(Parcours::AVANCE < 0)
 		Parcours::AVANCE = 0;
-	ui->progressBar->setValue(Parcours::AVANCE);
+    ui->progressBar->setValue(Parcours::AVANCE);
+    if(Parcours::AVANCE==100 && scan->isRunning())
+        displayInStatusBar("indexation terminee. Mise a jour de la base en cours...");
+}
+
+void MainWindow::FinScan()
+{
+    displayInStatusBar("Scan termine.");
+    setLEDGreen();
+    Parcours p;
+    displayNbElemBDDInStatusBar(p);
+}
+
+void MainWindow::setLEDGreen()
+{
+    QPixmap green("./green.png") ;
+    ui->LED->setPixmap(green);
+}
+
+void MainWindow::setLEDRed()
+{
+    QPixmap red("./red.png");
+    ui->LED->setPixmap(red);
 }
 
 void MainWindow::remplirWL(Parcours &remplir)
@@ -117,7 +140,7 @@ void MainWindow::on_lessWLButton_clicked()
         p.rmvFromWL(s.toStdString());
         p.regenerateFicCfg();
         remplirWL(p);
-		displayNbInStatusBar(p);
+        displayNbElemBDDInStatusBar(p);
     }
 }
 
@@ -132,7 +155,7 @@ void MainWindow::on_lessBLButton_clicked()
         p.rmvFromBL(s.toStdString());
         p.regenerateFicCfg();
         remplirBL(p);
-		displayNbInStatusBar(p);
+        displayNbElemBDDInStatusBar(p);
     }
 }
 
@@ -160,7 +183,7 @@ void MainWindow::on_WLplusButton_clicked()
         remplirWL(p);
         inclusion+=" est maintenant dans la liste blanche.";
         QMessageBox::information(this, "Ajout dans la white list",inclusion);
-		displayNbInStatusBar(p);
+        displayNbElemBDDInStatusBar(p);
     }
 
 }
@@ -178,7 +201,7 @@ void MainWindow::on_plusBLButton_clicked()
         remplirBL(p);
         exclusion+=" est maintenant dans la liste noire.";
         QMessageBox::information(this, "Ajout dans la black list",exclusion);
-		displayNbInStatusBar(p);
+        displayNbElemBDDInStatusBar(p);
     }
 }
 
@@ -194,7 +217,7 @@ void MainWindow::on_Buttonrafraichir_clicked()
     cout<<"rafraichir_button"<<endl;
     static bool prem = true;
     Sql* mabase=Sql::getInstance();
-	QSqlQueryModel *reponse = mabase->sqlSelect();
+    QSqlQueryModel *reponse = mabase->sqlSelect();
     if(! prem){
         ui->TableAffichageDoublons->selectAll();
         QItemSelectionModel * table = ui->TableAffichageDoublons->selectionModel();
@@ -204,23 +227,18 @@ void MainWindow::on_Buttonrafraichir_clicked()
     }
     ui->TableAffichageDoublons->setModel(reponse);
     prem = false;
-	if(scan->isFinished() || scan == NULL){
-		cout<<"le thread a terminé."<<endl;
-		displayInStatusBar("Scan termine.");
-	}
+    cout<<"fin rafraichir"<<endl;
 }
 
 void MainWindow::on_Buttonsupprimer_clicked()
 {
-    //todo : gérer suppression multiple
+    //todo : gérer suppression (multiple)
 }
 
 void MainWindow::on_Buttonmasquer_clicked()
 {
-    //done : gérer masquage multiple
     QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
     QModelIndexList indexes = lignes->selectedIndexes();
     for(QModelIndex i :indexes)
         ui->TableAffichageDoublons->hideRow(i.row());
-    //done : gérer dans rafraichir l'affichage de toutes les lignes
 }

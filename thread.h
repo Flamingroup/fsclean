@@ -7,11 +7,12 @@ class MainWindow;
 
 class Thread : public QThread
 {
+    Q_OBJECT
 public:
     Thread();
 	void run();
 signals:
-	void scanFinished();
+    void scanFinished();
 };
 
 #endif // THREAD_H

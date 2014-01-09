@@ -14,7 +14,7 @@
 
 Sql* Sql::_instance=NULL;
 
-Sql::Sql(path* p) {
+Sql::Sql(path* p) {   
 	cout << "sqlCreate" << endl;
 	if (exists(p->string())){
 		db = QSqlDatabase::addDatabase("QSQLITE");
@@ -37,12 +37,14 @@ Sql::Sql(path* p) {
 	// Insert table.
 	QSqlQuery query(db);
 	query.prepare("CREATE TABLE IF NOT EXISTS Fichiers (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, chemin TEXT UNIQUE, filenametrime TEXT, poids INTEGER, dateModif INTEGER, MD5 TEXT, stillexist INTEGER)");
-	if (!query.exec()) {
+    mutex.lock();
+    if (!query.exec()) {
 		cerr << "Error occurred creating table." << endl;
 		db.close();
 		unlink(p->string().c_str());
 		throw 3;
 	}
+    mutex.unlock();
 	db.close();
 	return;
 }
@@ -63,6 +65,7 @@ char Sql::sqlInsert(const Fichier& f){
 	QSqlQuery query(db);
 	query.prepare("SELECT * FROM Fichiers WHERE chemin = :chemin");
 	query.bindValue(":chemin", (QString)f.getChemin().string().c_str());
+    mutex.lock();
 	if (!query.exec()) {
 		cerr << "Error occurred SELECT." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		return -1;
@@ -92,15 +95,18 @@ char Sql::sqlInsert(const Fichier& f){
 			return 0;
 		}
 	}
+    mutex.unlock();
 	query.prepare("INSERT INTO Fichiers (chemin, filenametrime, poids, dateModif, stillexist) VALUES (:chemin, :filenametrime, :poids, :date, 1)");
 	query.bindValue(":chemin", (QString)f.getChemin().string().c_str());
 	query.bindValue(":filenametrime", (QString)f.getfilenameTrime().c_str());
 	query.bindValue(":poids", (QVariant)(quint64)f.getPoids());
 	query.bindValue(":date", f.getDateModif());
+    mutex.lock();
 	if (!query.exec()) {
 		cerr << "Error occurred inserting." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		return -1;
 	}
+    mutex.unlock();
 	db.close();
     //cout << "Fichier inséré ou MAJ sans erreurs" << endl;
 	cout << "noerror" << endl;
@@ -109,6 +115,7 @@ char Sql::sqlInsert(const Fichier& f){
 
 
 void Sql::sqlDelDeletedFiles() {
+
 	cout << "sqlDelDeletedFiles" << endl;
 	if (!db.open()) {
 		cerr << "Error occurred opening the database." << endl;
@@ -116,15 +123,18 @@ void Sql::sqlDelDeletedFiles() {
 	}
 	QSqlQuery query(db);
 	query.prepare("DELETE FROM Fichiers WHERE stillexist = 0");
-	if (!query.exec()) {
+    mutex.lock();
+        if (!query.exec()) {
 		cerr << "Error occurred deleting deleted files." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		return;
 	}
+    mutex.unlock();
 	db.close();
     //cout << "noerror" << endl;
 }
 
 void Sql::sqlRaz() {
+
 	cout << "sqlRAZ" << endl;
 	if (!db.open()) {
 		cerr << "Error occurred opening the database." << endl;
@@ -132,22 +142,26 @@ void Sql::sqlRaz() {
 	}
 	QSqlQuery query(db);
 	query.prepare("UPDATE Fichiers SET stillexist = 0");
-	if (!query.exec()) {
+    mutex.lock();
+    if (!query.exec()) {
 		cerr << "Error occurred while RAZing the flag." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		return;
 	}
+    mutex.unlock();
 	db.close();
 	cout << "noerror" << endl;
 }
 
 void Sql::Affiche(){
+
 	cout << "=== SQL AFFICHE ===" << endl;
 	if (!db.open()) {
 		cerr << "Error occurred opening the database." << endl;
 		return;
 	}
 	QSqlQuery qry(db);
-	if (!qry.exec("SELECT * FROM Fichiers")) {
+    mutex.lock();
+    if (!qry.exec("SELECT * FROM Fichiers")) {
 		cerr << "Error occurred Affiching the database." << qry.lastError().driverText().toStdString() << " " << qry.lastQuery().toStdString() << endl;
 		return;
 	}
@@ -167,11 +181,13 @@ void Sql::Affiche(){
 			 << y.toStdString() << endl
 			 << u.toStdString() << endl << endl;
 	}
+    mutex.unlock();
 	db.close();
 }
 
 
 bool Sql::sqlSetMd5(Fichier& f) {
+
     cout << "sqlSetMd5" << endl;
     if (f.getid() == -1 && f.getMD5() != "") {
         return false;
@@ -184,16 +200,19 @@ bool Sql::sqlSetMd5(Fichier& f) {
     query.prepare("UPDATE Fichiers SET MD5 = :MD5 WHERE id = :id");
     query.bindValue(":MD5", (QString)f.getMD5().c_str());
     query.bindValue(":id", f.getid());
+    mutex.lock();
     if (!query.exec()) {
         cerr << "Error occurred while Updating the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
         return false;
     }
+    mutex.unlock();
     db.close();
     //cout << "noerror" << endl;
     return true;
 }
 
 bool Sql::sqlDelete(Fichier& f) {
+
     cout<<"Sql::sqlDelete"<<endl;
     if (f.getid() == -1) {
         return false;
@@ -205,16 +224,19 @@ bool Sql::sqlDelete(Fichier& f) {
     QSqlQuery query(db);
     query.prepare("DETETE FROM Fichiers WHERE id = :id");
     query.bindValue(":id", f.getid());
+    mutex.lock();
     if (!query.exec()) {
         cerr << "Error occurred while Deleting the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
         return false;
     }
+    mutex.unlock();
     db.close();
     //cout << "noerror" << endl;
     return false;
 }
 
 bool Sql::sqlCreateMD5(){
+
     cout << "sql::sqlCreateMD5" << endl;
 	list<Fichier*> lf;
     if (!db.open()) {
@@ -227,10 +249,12 @@ bool Sql::sqlCreateMD5(){
         cerr << "Error occurred while Deleting the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
         return false;
     }
+    mutex.lock();
     while (query.next()) {
         //cout << "Un tour " << endl;
 		lf.push_back(new Fichier(query));
     }
+    mutex.unlock();
 	list<Fichier*>::iterator it=lf.begin();
 	list<Fichier*>::iterator fin=lf.end();
 	while (it != fin) {
@@ -244,6 +268,7 @@ bool Sql::sqlCreateMD5(){
 
 
 QSqlQueryModel* Sql::sqlSelect(string requete){
+
     cout<<"sql::sqlSelect"<<endl;
     QSqlQueryModel* model = new QSqlQueryModel();
     if (!db.open()) {
@@ -252,11 +277,13 @@ QSqlQueryModel* Sql::sqlSelect(string requete){
     }
     QSqlQuery query(db);
     query.prepare(QString::fromStdString(requete));
+    mutex.lock();
     if (!query.exec()) {
         cerr << "Error occurred while Deleting the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
         return 0;
     }
     model->setQuery(query);
+    mutex.unlock();
     db.close();
     //cout << "noerror" << endl;
     return model;

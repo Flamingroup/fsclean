@@ -12,5 +12,5 @@ void Thread::run()
 	Parcours p;
 	p.runAll();
 	cout<<"fin thread"<<endl;
-	//emit scanFinished();
+    emit scanFinished();
 }
