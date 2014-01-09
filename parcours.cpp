@@ -6,6 +6,7 @@
 #include <fstream>
 
 int Parcours::AVANCE = 0;
+
 Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
     cout<<"Parcours::Parcours()"<<endl;
     ifstream config(chemin.c_str(), ios_base::in);

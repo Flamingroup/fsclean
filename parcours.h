@@ -17,6 +17,7 @@ class Parcours
         double nbApprox;
 		double denom;
     public:
+        //Permet au GUI de connaitre l'avancement du scan
 		static int AVANCE;
 		/**
          * @brief listeblanche : liste des dossiers à scanner*/
@@ -41,8 +42,8 @@ class Parcours
         void voirWL();
         void voirBL();
 		void addToWL(string chemin);
-        void addToBL(string chemin);
-		const double& getNbApprox(){countApprox();return nbApprox;}
+        void addToBL(string chemin);//normalement ne sert à rien
+        const double& getNbApprox(){/*countApprox();*/return nbApprox;}
 		void rmvFromWL(string chemin);
 		void rmvFromBL(string chemin);
 		/**

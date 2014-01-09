@@ -17,12 +17,15 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void displayInStatusBar(const std::string & message);
-	void displayNbInStatusBar(Parcours &p);
+    void displayNbElemBDDInStatusBar(Parcours &p);
     Thread * scan;
 	QTimer *timer;
 public slots:
 	void setProgress();
+    void FinScan();
 private slots:
+    void setLEDGreen();
+    void setLEDRed();
     void on_scanButton_clicked();
 
     void remplirWL(Parcours &remplir);

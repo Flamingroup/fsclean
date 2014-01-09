@@ -4,12 +4,15 @@
 #include "fichier.h"
 #include <QSqlQueryModel>
 #include <QThread>
+#include <QMutex>
 
 class Sql {
+    //mapute0682524138
 private :
 		QSqlDatabase db;
 		static Sql* _instance;
 		Sql(path* p=new path("fsclean.db"));
+        QMutex mutex;
 public:
 		static Sql* getInstance();
 		char sqlInsert(const Fichier &);
