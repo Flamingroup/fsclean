@@ -23,6 +23,7 @@ Sql::Sql(path* p) {
 			cerr << "Error occurred opening the database." << endl;
 			throw 1;
 		}
+		db.close();
 		return;
 	}
 	// Creation de la bdd
