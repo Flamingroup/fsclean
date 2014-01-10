@@ -212,7 +212,8 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
 					if(is_regular_file(*it) && !isInBlacklist(it->path()) && !isHidden(it->path())) {
 						if (!countOnly){
 							f.remplir(it->path());
-							mabase->sqlInsert(f);
+							if (f.getPoids() != 0)
+								mabase->sqlInsert(f);
 						}
                         ++nbApprox;
 						AVANCE =(nbApprox/denom)*100;
@@ -264,7 +265,7 @@ void Parcours::resetFicCfg() {
 	cout<<"fin Parcours::Parcours()"<<endl;
 }
 
-void Parcours::regenerateFicCfg() {
+void Parcours::regenerateFicCfg(bool err) {
 	cout<<"Parcours::regenerateFicCfg()\n"<<endl;
 	ofstream config(cheminFicCfg, ios_base::out);
 	if (config) {
@@ -280,7 +281,10 @@ void Parcours::regenerateFicCfg() {
 		for(;it!=fin;it++){
 			config << (*it).first << endl;
 		}
-        config << "nombreapprox" << endl << nbApprox << endl;
+		if (!err)
+			config << "nombreapprox" << endl << nbApprox << endl;
+		else
+			config << "nombreapprox" << endl << "0" << endl;
 		if(scannercaches){
 			cout << "scannercaches=1" << endl;
 		}

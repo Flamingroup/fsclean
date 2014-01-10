@@ -31,18 +31,19 @@ HEADERS += \
     about.h \
     thread.h
 
-LIBS+=  /usr/lib/i386-linux-gnu/libboost_system.so \
-        /usr/lib/i386-linux-gnu/libboost_filesystem.so \
-        -ltomcrypt
-
-#LIBS+=  /usr/lib/x86_64-linux-gnu/libboost_system.so \
-#        /usr/lib/x86_64-linux-gnu/libboost_filesystem.so \
+#LIBS+=  /usr/lib/i386-linux-gnu/libboost_system.so \
+#        /usr/lib/i386-linux-gnu/libboost_filesystem.so \
 #        -ltomcrypt
+
+LIBS+=  /usr/lib/x86_64-linux-gnu/libboost_system.so \
+        /usr/lib/x86_64-linux-gnu/libboost_filesystem.so \
+        -ltomcrypt
 
 OTHER_FILES += \
     config.cfg
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS +=   -std=c++11 \
+                    -O3
 
 FORMS += \
     interface.ui \

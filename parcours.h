@@ -27,7 +27,7 @@ class Parcours
 		 * @brief listenoire : liste des sous dossiers de liste blanche à ne pas scanner
 		 */
 		map<string, path*> listenoire;
-    //public:
+	//public:
 		/**
 		 * @brief Parcours
 		 * @param chemin : chemin du fichier contenant les paramètres de recherche des doublons
@@ -54,7 +54,7 @@ class Parcours
         bool isInBlacklist(const path &p);
 		bool isHidden(const path & p);
         void resetFicCfg();
-		void regenerateFicCfg();
+		void regenerateFicCfg(bool err=false);
 		void countApprox();
         QSqlQueryModel *sqlSelect(string requete = "SELECT * FROM Fichiers WHERE MD5 IN (SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1)");
 };

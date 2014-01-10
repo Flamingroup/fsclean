@@ -108,33 +108,12 @@ void Fichier::voir()
 	cout << "MD5 : " << MD5 << endl;
 }
 
-bool Fichier::remplir(const QSqlQuery& query)
-{   //on nettoie le vieux fichier pour le réutiliser
-	chemin.clear();
-    MD5.clear();
-    filenameTrime.clear();
-    poids = 0;
-    dateModif = 0;
-    //on remplit
-    id=query.value(0).toUInt();
-    path* p=Parcours::stringToPath(query.value(1).toString().toStdString()); // si segfault : faire par copie
-    if (p == NULL)
-        return false;
-    chemin=(*p);
-    delete p;
-    filenameTrime = query.value(2).toString().toStdString();
-    poids = query.value(3).toULongLong();
-    dateModif = query.value(4).toULongLong();
-    calcMD5();
-	return true;
-}
-
 void Fichier::calcMD5() {
     hash_state md;
     /* setup the hash */
     md5_init(&md);
-    ifstream config(chemin.c_str(), ios_base::in);
-    if (config) {
+	ifstream config(chemin.c_str(), ios_base::in);
+	if (config) {
 		string ligne;
 		md5_process(&md, (const unsigned char*)ligne.c_str(), ligne.length());
 		while (getline(config, ligne)) {
@@ -143,14 +122,15 @@ void Fichier::calcMD5() {
 		}
         config.close();
 	}
-    else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
+	else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
 	stringstream test;
-	unsigned char out[15];
+	unsigned char out[16];
     /* get the hash in out[0..15] */
 	md5_done(&md, out);
 	//MD5=(const char *)out;
 	for (int b=0; b<16; ++b){
 		test << (int)out[b];
 	}
+	cerr << "Le problème est là !" << endl;
 	MD5=test.str();
 }

@@ -95,6 +95,7 @@ void MainWindow::FinScan()
     setLEDGreen();
     Parcours p;
     displayNbElemBDDInStatusBar(p);
+	on_Buttonrafraichir_clicked();
 }
 
 void MainWindow::setLEDGreen()
@@ -214,18 +215,22 @@ void MainWindow::on_actionA_propos_triggered()
 
 void MainWindow::on_Buttonrafraichir_clicked()
 {
-    cout<<"rafraichir_button"<<endl;
-    static bool prem = true;
-    Sql* mabase=Sql::getInstance();
-    QSqlQueryModel *reponse = mabase->sqlSelect();
-    if(! prem){
-        ui->TableAffichageDoublons->selectAll();
-        QItemSelectionModel * table = ui->TableAffichageDoublons->selectionModel();
-        QModelIndexList indexes = table->selectedIndexes();
-        for(QModelIndex i :indexes)
-            ui->TableAffichageDoublons->showRow(i.row());
-    }
-    ui->TableAffichageDoublons->setModel(reponse);
+	cout<<"rafraichir_button"<<endl;
+	if (scan->isRunning())
+		return;
+	static bool prem = true;
+	if(! prem){
+		ui->TableAffichageDoublons->selectAll();
+		QItemSelectionModel * table = ui->TableAffichageDoublons->selectionModel();
+		QModelIndexList indexes = table->selectedIndexes();
+		for(QModelIndex i :indexes)
+			ui->TableAffichageDoublons->showRow(i.row());
+	}
+	if (!scan->isRunning()){
+		Sql* mabase=Sql::getInstance();
+		QSqlQueryModel *reponse = mabase->sqlSelect();
+		ui->TableAffichageDoublons->setModel(reponse);
+	}
     prem = false;
     cout<<"fin rafraichir"<<endl;
 }
