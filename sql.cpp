@@ -258,23 +258,18 @@ bool Sql::sqlCreateMD5(){
     if (!db.open()) {
         cerr << "Error occurred opening the database." << endl;
         return false;
-    }
-	cout << "1" << endl;
+	}
     QSqlQuery query(db);
 	query.prepare("SELECT * FROM Fichiers WHERE poids IN (SELECT poids FROM Fichiers WHERE 1 GROUP BY poids HAVING COUNT(poids)>1 AND MD5 IS NULL)");
 	mutex.lock();
-	cout << "1" << endl;
 	if (!query.exec()) {
         cerr << "Error occurred while Deleting the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
 		return false;
 	}
-	cout << "1" << endl;
-    while (query.next()) {
-		cout << "Un tour " << endl;
+	while (query.next()) {
 		lf.push_back(new Fichier(query));
-    }
-	cout << "1" << endl;
+	}
     mutex.unlock();
 	list<Fichier*>::iterator it=lf.begin();
 	list<Fichier*>::iterator fin=lf.end();

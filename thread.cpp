@@ -9,8 +9,8 @@ Thread::Thread()
 void Thread::run()
 {
     cout<<"debut thread"<<endl;
-	Parcours p;
-	p.runAll();
+	Parcours *p=Parcours::getInstance();
+	p->runAll();
 	cout<<"fin thread"<<endl;
     emit scanFinished();
 }

@@ -6,6 +6,7 @@
 #include <fstream>
 
 int Parcours::AVANCE = 0;
+Parcours* Parcours::_instance=NULL;
 
 Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
     cout<<"Parcours::Parcours()"<<endl;
@@ -69,9 +70,20 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 	else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
 	denom=nbApprox;
 	regenerateFicCfg();
-    cout<<"fin Parcours::Parcours() " << nbApprox << endl;
+	cout<<"fin Parcours::Parcours() " << nbApprox << endl;
 }
 
+Parcours* Parcours::getInstance(string chemin) {
+	if(_instance == 0){
+		try {
+			_instance = new Parcours(chemin);
+		}
+		catch (int i) {
+			cerr << "Erreur construction Parcours, erreur :" << i << endl;
+		}
+	}
+	return _instance;
+}
 void Parcours::countApprox() {
     cout << "Parcours::CountApprox" << endl;
     nbApprox=0;
@@ -80,6 +92,11 @@ void Parcours::countApprox() {
 	for(; it!=end; ++it){
 		runFromPath(*it, true);
 	}
+}
+
+Parcours::~Parcours()
+{
+	cout << "************************************************************************************************************************" << endl;
 }
 
 path* Parcours::stringToPath(string toTransform, bool verifExist) {

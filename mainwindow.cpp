@@ -18,8 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    scan = new Thread;
-    Parcours p;
+	scan = new Thread;
     ui->setupUi(this);
     ui->LED->setScaledContents(true);
 	timer = new QTimer(this);
@@ -27,9 +26,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(scan,SIGNAL(scanFinished()),this,SLOT(FinScan()));
     timer->start(100);
     cout<<"Initialisation GUI"<<endl;
-    remplirWL(p);
-	remplirBL(p);
-    displayNbElemBDDInStatusBar(p);
+	remplirWL();
+	remplirBL();
+	displayNbElemBDDInStatusBar();
 	ui->progressBar->setValue(Parcours::AVANCE);
 	on_Buttonrafraichir_clicked();
     cout<<"FIN Initialisation GUI\n"<<endl;
@@ -51,7 +50,7 @@ void MainWindow::on_scanButton_clicked()
 	if (scan == NULL){
 		scan=new Thread;
 	}//normalement else inutile
-	else scan->quit();
+	else {scan->quit(); cout<<"else"<<endl;}
     setLEDRed();
 	scan->start();
     if(scan->isRunning()){
@@ -68,10 +67,11 @@ void MainWindow::displayInStatusBar(const std::string & message) {
 	statusBar()->showMessage(message.c_str());
 }
 
-void MainWindow::displayNbElemBDDInStatusBar(Parcours& p)
+void MainWindow::displayNbElemBDDInStatusBar()
 {
+	Parcours *p=Parcours::getInstance();
 	ostringstream os;
-	os<<p.getNbApprox();
+	os<<p->getNbApprox();
 	string str = os.str();
 	str+=" fichier(s) en base de donnees.";
 	displayInStatusBar(str);
@@ -92,9 +92,8 @@ void MainWindow::setProgress()
 void MainWindow::FinScan()
 {
     displayInStatusBar("Scan termine.");
-    setLEDGreen();
-    Parcours p;
-    displayNbElemBDDInStatusBar(p);
+	setLEDGreen();
+	displayNbElemBDDInStatusBar();
 	on_Buttonrafraichir_clicked();
 }
 
@@ -110,20 +109,22 @@ void MainWindow::setLEDRed()
     ui->LED->setPixmap(red);
 }
 
-void MainWindow::remplirWL(Parcours &remplir)
+void MainWindow::remplirWL()
 {
-    map<string, path*>::iterator it = remplir.listeblanche.begin();
-    map<string, path*>::iterator fin = remplir.listeblanche.end();
+	Parcours *remplir=Parcours::getInstance();
+	map<string, path*>::iterator it = remplir->listeblanche.begin();
+	map<string, path*>::iterator fin = remplir->listeblanche.end();
     ui->listwhiteList->clear();//on nettoie avant de remplir
     for(;it!=fin;it++){
         ui->listwhiteList->addItem(QString::fromStdString((*it).first));
     }
 }
 
-void MainWindow::remplirBL(Parcours &remplir)
+void MainWindow::remplirBL()
 {
-    map<string, path*>::iterator it = remplir.listenoire.begin();
-    map<string, path*>::iterator fin = remplir.listenoire.end();
+	Parcours *remplir=Parcours::getInstance();
+	map<string, path*>::iterator it = remplir->listenoire.begin();
+	map<string, path*>::iterator fin = remplir->listenoire.end();
     ui->listblackList->clear();//on nettoie avant de remplir
     for(;it!=fin;it++){
         ui->listblackList->addItem(QString::fromStdString((*it).first));
@@ -136,12 +137,12 @@ void MainWindow::on_lessWLButton_clicked()
     //pour modifier la config : si map modifiée, config effacée et nouvelle config vaut listeB+N
     if(ui->listwhiteList->count() && ui->listwhiteList->selectedItems().count()){
         QString s = ui->listwhiteList->currentItem()->text();
-        std::cout<<"lessWLButton enleve = "<<s.toStdString()<<endl;
-        Parcours p;
-        p.rmvFromWL(s.toStdString());
-        p.regenerateFicCfg();
-        remplirWL(p);
-        displayNbElemBDDInStatusBar(p);
+		std::cout<<"lessWLButton enleve = "<<s.toStdString()<<endl;
+		Parcours *p=Parcours::getInstance();
+		p->rmvFromWL(s.toStdString());
+		p->regenerateFicCfg();
+		remplirWL();
+		displayNbElemBDDInStatusBar();
     }
 }
 
@@ -151,22 +152,22 @@ void MainWindow::on_lessBLButton_clicked()
     //pour modifier la config : si map modifiée, config effacée et nouvelle config vaut listeB+N
     if(ui->listblackList->count() && ui->listblackList->selectedItems().count()){
         QString s = ui->listblackList->currentItem()->text();
-        std::cout<<"lessWLButton enleve = "<<s.toStdString()<<endl;
-        Parcours p;
-        p.rmvFromBL(s.toStdString());
-        p.regenerateFicCfg();
-        remplirBL(p);
-        displayNbElemBDDInStatusBar(p);
+		std::cout<<"lessWLButton enleve = "<<s.toStdString()<<endl;
+		Parcours *p=Parcours::getInstance();
+		p->rmvFromBL(s.toStdString());
+		p->regenerateFicCfg();
+		remplirBL();
+		displayNbElemBDDInStatusBar();
     }
 }
 
 
 void MainWindow::on_actionReinitialiser_param_defaut_triggered()
 {
-    Parcours p;
-    p.resetFicCfg();
-    remplirBL(p);
-    remplirWL(p);
+	Parcours *p=Parcours::getInstance();
+	p->resetFicCfg();
+	remplirBL();
+	remplirWL();
     on_Buttonrafraichir_clicked();
 }
 
@@ -177,14 +178,14 @@ void MainWindow::on_WLplusButton_clicked()
     //            regen config
     //pe plus tard : test si scan en cours avant de modif config
     QString inclusion = QFileDialog::getExistingDirectory(this, "Ajouter au scan", "/", QFileDialog::ShowDirsOnly );
-    if(inclusion.length() > 0){
-        Parcours p;
-        p.addToWL(inclusion.toStdString());
-        p.regenerateFicCfg();
-        remplirWL(p);
+	if(inclusion.length() > 0){
+		Parcours *p=Parcours::getInstance();
+		p->addToWL(inclusion.toStdString());
+		p->regenerateFicCfg();
+		remplirWL();
         inclusion+=" est maintenant dans la liste blanche.";
         QMessageBox::information(this, "Ajout dans la white list",inclusion);
-        displayNbElemBDDInStatusBar(p);
+		displayNbElemBDDInStatusBar();
     }
 
 }
@@ -195,14 +196,14 @@ void MainWindow::on_plusBLButton_clicked()
     //si existe : ajout
     //          regen config
     QString exclusion = QFileDialog::getExistingDirectory(this, "Bannir des scans", "/", QFileDialog::ShowDirsOnly );
-    if(exclusion.length() > 0){
-        Parcours p;
-        p.addToBL(exclusion.toStdString());
-        p.regenerateFicCfg();
-        remplirBL(p);
+	if(exclusion.length() > 0){
+		Parcours *p=Parcours::getInstance();
+		p->addToBL(exclusion.toStdString());
+		p->regenerateFicCfg();
+		remplirBL();
         exclusion+=" est maintenant dans la liste noire.";
         QMessageBox::information(this, "Ajout dans la black list",exclusion);
-        displayNbElemBDDInStatusBar(p);
+		displayNbElemBDDInStatusBar();
     }
 }
 
@@ -238,6 +239,15 @@ void MainWindow::on_Buttonrafraichir_clicked()
 void MainWindow::on_Buttonsupprimer_clicked()
 {
     //todo : gérer suppression (multiple)
+	QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
+	QModelIndexList indexes = lignes->selectedIndexes();
+	for(QModelIndex i :indexes){
+		QFile(ui->TableAffichageDoublons->item(i.row(),1)->toString());
+		//bool valid = file.exists();
+		//bool valid = file.remove();
+		//ui->TableAffichageDoublons->de
+		//plus virer de bdd
+	}
 }
 
 void MainWindow::on_Buttonmasquer_clicked()

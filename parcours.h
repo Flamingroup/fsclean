@@ -16,8 +16,15 @@ class Parcours
 		bool scannercaches=false;
         double nbApprox;
 		double denom;
+		static Parcours * _instance;
+		/**
+		 * @brief Parcours
+		 * @param chemin : chemin du fichier contenant les paramètres de recherche des doublons
+		 */
+		Parcours(string chemin);
     public:
         //Permet au GUI de connaitre l'avancement du scan
+		static Parcours* getInstance(string chemin="./config.cfg");
 		static int AVANCE;
 		/**
          * @brief listeblanche : liste des dossiers à scanner*/
@@ -27,12 +34,7 @@ class Parcours
 		 * @brief listenoire : liste des sous dossiers de liste blanche à ne pas scanner
 		 */
 		map<string, path*> listenoire;
-	//public:
-		/**
-		 * @brief Parcours
-		 * @param chemin : chemin du fichier contenant les paramètres de recherche des doublons
-		 */
-		Parcours(string chemin="./config.cfg");
+
 		/**
 		 * @brief stringToPath : Transforme nimporte quelle string de chemin relatif en path avec chemin absolu
 		 * @param toTransform : chemin du fichier à transformer
@@ -57,6 +59,7 @@ class Parcours
 		void regenerateFicCfg(bool err=false);
 		void countApprox();
         QSqlQueryModel *sqlSelect(string requete = "SELECT * FROM Fichiers WHERE MD5 IN (SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1)");
+		~Parcours();
 };
 
 

@@ -17,7 +17,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void displayInStatusBar(const std::string & message);
-    void displayNbElemBDDInStatusBar(Parcours &p);
+	void displayNbElemBDDInStatusBar();
     Thread * scan;
 	QTimer *timer;
 public slots:
@@ -28,8 +28,8 @@ private slots:
     void setLEDRed();
     void on_scanButton_clicked();
 
-    void remplirWL(Parcours &remplir);
-    void remplirBL(Parcours &remplir);
+	void remplirWL();
+	void remplirBL();
 
     void on_lessWLButton_clicked();
 
