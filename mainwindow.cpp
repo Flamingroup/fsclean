@@ -13,6 +13,7 @@
 #include <sstream>
 #include "parcours.h"
 #include <QTimer>
+#include <QStandardItemModel>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -31,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	displayNbElemBDDInStatusBar();
 	ui->progressBar->setValue(Parcours::AVANCE);
 	on_Buttonrafraichir_clicked();
+	ui->TableAffichageDoublons->resizeColumnsToContents();
     cout<<"FIN Initialisation GUI\n"<<endl;
 }
 
@@ -238,15 +240,28 @@ void MainWindow::on_Buttonrafraichir_clicked()
 
 void MainWindow::on_Buttonsupprimer_clicked()
 {
-    //todo : gérer suppression (multiple)
-	QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
-	QModelIndexList indexes = lignes->selectedIndexes();
-	for(QModelIndex i :indexes){
-		QFile(ui->TableAffichageDoublons->item(i.row(),1)->toString());
-		//bool valid = file.exists();
-		//bool valid = file.remove();
-		//ui->TableAffichageDoublons->de
-		//plus virer de bdd
+	cout<<"debut"<<endl;
+	//todo : gérer suppression (multiple)
+	try {
+		QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
+		QModelIndexList indexes = lignes->selectedIndexes();
+		for(QModelIndex i :indexes){
+			cout<<"avant" << endl;
+			QStandardItemModel item(1,1,ui->TableAffichageDoublons);
+			if(item.insertRow(1,i)) cout<<"ok"<<endl;
+			else cout<<"wrong"<<endl;
+			cout<<"apres"<<endl;
+			//string s =item.item(i.row())->data().toString().toStdString();
+			cout<<"remove : "<<endl;
+			//cout << s << endl;
+			//bool valid = file.exists();
+			//bool valid = file.remove();
+			item.removeRow(i.row());
+			//plus virer de bdd DELETE(string)
+		}
+	}
+	catch (...){
+
 	}
 }
 

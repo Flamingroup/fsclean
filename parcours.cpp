@@ -94,11 +94,6 @@ void Parcours::countApprox() {
 	}
 }
 
-Parcours::~Parcours()
-{
-	cout << "************************************************************************************************************************" << endl;
-}
-
 path* Parcours::stringToPath(string toTransform, bool verifExist) {
     if(toTransform.length() == 0) return NULL;
 	if (toTransform[0] == '~') {

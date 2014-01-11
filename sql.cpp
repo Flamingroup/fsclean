@@ -211,7 +211,7 @@ bool Sql::sqlSetMd5(Fichier& f) {
         return false;
     }
     QSqlQuery query(db);
-    query.prepare("UPDATE Fichiers SET MD5 = :MD5 WHERE id = :id");
+	query.prepare("UPDATE Fichiers SET MD5 = :MD5 WHERE id = :id");
     query.bindValue(":MD5", (QString)f.getMD5().c_str());
     query.bindValue(":id", f.getid());
     mutex.lock();
@@ -286,7 +286,7 @@ bool Sql::sqlCreateMD5(){
 QSqlQueryModel* Sql::sqlSelect(string requete){
 
     cout<<"sql::sqlSelect"<<endl;
-    QSqlQueryModel* model = new QSqlQueryModel();
+	QSqlQueryModel* model = new QSqlQueryModel();
     if (!db.open()) {
         cerr << "Error occurred opening the database." << endl;
         return 0;
@@ -299,7 +299,7 @@ QSqlQueryModel* Sql::sqlSelect(string requete){
 		mutex.unlock();
         return 0;
     }
-    model->setQuery(query);
+	model->setQuery(query);
     mutex.unlock();
     db.close();
     //cout << "noerror" << endl;
