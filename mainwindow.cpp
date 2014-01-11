@@ -240,29 +240,33 @@ void MainWindow::on_Buttonrafraichir_clicked()
 
 void MainWindow::on_Buttonsupprimer_clicked()
 {
-	cout<<"debut"<<endl;
-	//todo : gérer suppression (multiple)
-	try {
-		QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
-		QModelIndexList indexes = lignes->selectedIndexes();
-		for(QModelIndex i :indexes){
-			cout<<"avant" << endl;
-			QStandardItemModel item(1,1,ui->TableAffichageDoublons);
-			if(item.insertRow(1,i)) cout<<"ok"<<endl;
-			else cout<<"wrong"<<endl;
-			cout<<"apres"<<endl;
-			//string s =item.item(i.row())->data().toString().toStdString();
-			cout<<"remove : "<<endl;
-			//cout << s << endl;
-			//bool valid = file.exists();
-			//bool valid = file.remove();
-			item.removeRow(i.row());
-			//plus virer de bdd DELETE(string)
+		cout<<"debut"<<endl;
+		//todo : gérer suppression (multiple)
+		try {
+			QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
+			QModelIndexList indexes = lignes->selectedIndexes();
+			for(QModelIndex i :indexes){
+				QString s = i.data(0).toString();
+				cout<<"s=" << s.toStdString()<< endl;
+				cout<<"tour"<<endl;
+				QFile file(s);
+				if(file.exists()){
+					Sql* mabase = Sql::getInstance();
+					mabase->sqlDelete(s.toStdString());
+					if(file.remove()){
+						cout << s.toStdString() << " a été supprimé du disque." << endl;
+					}
+				}
+				else {
+					cout << s.toStdString() << " file doesn't exist, we do nothing." << endl;
+				}
+			}
+		//à la fin des suppressions, on rafraichit
+			on_Buttonrafraichir_clicked();
 		}
-	}
-	catch (...){
+		catch (...){
 
-	}
+		}
 }
 
 void MainWindow::on_Buttonmasquer_clicked()
