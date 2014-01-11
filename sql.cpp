@@ -107,9 +107,9 @@ char Sql::sqlInsert(const Fichier& f){
 	}
 	mutex.unlock();
 	query.prepare("INSERT INTO Fichiers (chemin, filenametrime, poids, dateModif, stillexist) VALUES (:chemin, :filenametrime, :poids, :date, 1)");
-	query.bindValue(":chemin", (QString)f.getChemin().string().c_str());
-	query.bindValue(":filenametrime", (QString)f.getfilenameTrime().c_str());
-	query.bindValue(":poids", (QVariant)(quint64)f.getPoids());
+	query.bindValue(":chemin", QString(f.getChemin().string().c_str()));
+	query.bindValue(":filenametrime", QString(f.getfilenameTrime().c_str()));
+	query.bindValue(":poids", QVariant(quint64(f.getPoids())));
 	query.bindValue(":date", f.getDateModif());
 	mutex.lock();
 	if (!query.exec()) {
@@ -226,19 +226,16 @@ bool Sql::sqlSetMd5(Fichier& f) {
     return true;
 }
 
-bool Sql::sqlDelete(Fichier& f) {
+bool Sql::sqlDelete(string chemin) {
 
     cout<<"Sql::sqlDelete"<<endl;
-    if (f.getid() == -1) {
-        return false;
-    }
     if (!db.open()) {
         cerr << "Error occurred opening the database." << endl;
         return false;
     }
     QSqlQuery query(db);
-    query.prepare("DETETE FROM Fichiers WHERE id = :id");
-    query.bindValue(":id", f.getid());
+	query.prepare("DETETE FROM Fichiers WHERE chemin = :chemin");
+	query.bindValue(":chemin", QString(chemin.c_str()));
     mutex.lock();
     if (!query.exec()) {
         cerr << "Error occurred while Deleting the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
@@ -255,6 +252,7 @@ bool Sql::sqlCreateMD5(){
 
     cout << "sql::sqlCreateMD5" << endl;
 	list<Fichier*> lf;
+	Fichier* tmp;
     if (!db.open()) {
         cerr << "Error occurred opening the database." << endl;
         return false;
@@ -268,7 +266,13 @@ bool Sql::sqlCreateMD5(){
 		return false;
 	}
 	while (query.next()) {
-		lf.push_back(new Fichier(query));
+		try {
+			tmp=new Fichier(query);
+		}
+		catch (int i) {
+			continue;
+		}
+		lf.push_back(tmp);
 	}
     mutex.unlock();
 	list<Fichier*>::iterator it=lf.begin();

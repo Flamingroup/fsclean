@@ -6,6 +6,7 @@
 #include <tomcrypt.h>
 #include <fstream>
 #include <sstream>
+#include <sql.h>
 
 using namespace boost::filesystem;
 
@@ -14,13 +15,17 @@ Fichier::Fichier()//path p): chemin(p)
     id=-1;
 }
 
-Fichier::Fichier(QSqlQuery& query)//path p): chemin(p)
+Fichier::Fichier(QSqlQuery& query)
 {
 	//on remplit
 	id=query.value(0).toUInt();
 	path* p=Parcours::stringToPath(query.value(1).toString().toStdString()); // si segfault : faire par copie
-	if (p == NULL)
+	if (p == NULL) {
+		cerr << query.value(1).toString().toStdString() << " n'existe pas, suppression de ce fichier dans la base de donnée" << endl;
+		Sql* mabase=Sql::getInstance();
+		mabase->sqlDelete(query.value(1).toString().toStdString());
 		throw 1;
+	}
 	chemin=(*p);
 	delete p;
 	filenameTrime = query.value(2).toString().toStdString();
@@ -131,6 +136,5 @@ void Fichier::calcMD5() {
 	for (int b=0; b<16; ++b){
 		test << (int)out[b];
 	}
-	cerr << "Le problème est là !" << endl;
 	MD5=test.str();
 }

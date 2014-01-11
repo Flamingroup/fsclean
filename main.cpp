@@ -18,13 +18,11 @@ using namespace std;
 int main(int argc, char *argv[])
 {  
     ///soon
-	QApplication app(argc,argv);
-	MainWindow fenetre;
-	fenetre.show();
-	return app.exec();
+//	QApplication app(argc,argv);
+//	MainWindow fenetre;
+//	fenetre.show();
+//	return app.exec();
 
-//	Parcours parc;
-//	parc.runAll();
-//	Sql* base = Sql::getInstance();
-//	base->sqlCreateMD5();
+	Parcours* parc=Parcours::getInstance();
+	parc->runAll();
 }

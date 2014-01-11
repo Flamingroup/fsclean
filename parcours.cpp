@@ -192,13 +192,13 @@ void Parcours::runAll() {
 	 */
 	nbApprox=0;
 	AVANCE = (nbApprox/denom)*100;
-    cout << "Parcours::runAll()" << endl;
+	cout << "Parcours::runAll()" << endl;
 	Sql* mabase=Sql::getInstance();
 	mabase->sqlRaz();
 	map<string, path*>::iterator it=listeblanche.begin();
 	map<string, path*>::iterator end=listeblanche.end();
 	for(; it!=end; ++it){
-        cout<<"Parcours::runall() : "<<(*it).first<<endl<<" va etre inspecté"<<endl;
+		cout<<"Parcours::runall() : "<<(*it).first<<endl<<" va etre inspecté"<<endl;
 		runFromPath(*it);
 	}
 	mabase->sqlDelDeletedFiles();
