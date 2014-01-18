@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	displayNbElemBDDInStatusBar();
 	ui->progressBar->setValue(Parcours::AVANCE);
 	on_Buttonrafraichir_clicked();
-	ui->TableAffichageDoublons->resizeColumnsToContents();
+    ui->TableAffichageDoublons->resizeColumnsToContents();
     cout<<"FIN Initialisation GUI\n"<<endl;
 }
 
@@ -73,9 +73,10 @@ void MainWindow::displayNbElemBDDInStatusBar()
 {
 	Parcours *p=Parcours::getInstance();
 	ostringstream os;
-	os<<p->getNbApprox();
+    p->countApprox();
+    os<<p->getNbApprox();
 	string str = os.str();
-	str+=" fichier(s) en base de donnees.";
+    str+=" fichiers potentiels dans la zone de scan.";
 	displayInStatusBar(str);
 }
 
@@ -93,7 +94,6 @@ void MainWindow::setProgress()
 
 void MainWindow::FinScan()
 {
-    displayInStatusBar("Scan termine.");
 	setLEDGreen();
 	displayNbElemBDDInStatusBar();
 	on_Buttonrafraichir_clicked();
@@ -219,8 +219,10 @@ void MainWindow::on_actionA_propos_triggered()
 void MainWindow::on_Buttonrafraichir_clicked()
 {
 	cout<<"rafraichir_button"<<endl;
-	if (scan->isRunning())
+    if (scan->isRunning()){
+        cout <<"rafraichissement impo, scan en cours"<<endl;
 		return;
+    }
 	static bool prem = true;
 	if(! prem){
 		ui->TableAffichageDoublons->selectAll();
@@ -230,6 +232,7 @@ void MainWindow::on_Buttonrafraichir_clicked()
 			ui->TableAffichageDoublons->showRow(i.row());
 	}
 	if (!scan->isRunning()){
+        cout<<"scan not running" <<endl;
 		Sql* mabase=Sql::getInstance();
 		QSqlQueryModel *reponse = mabase->sqlSelect();
 		ui->TableAffichageDoublons->setModel(reponse);
@@ -246,19 +249,21 @@ void MainWindow::on_Buttonsupprimer_clicked()
 		QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
 		QModelIndexList indexes = lignes->selectedIndexes();
 		for(QModelIndex i :indexes){
-			cout<<"avant" << endl;
-			QStandardItemModel item(1,1,ui->TableAffichageDoublons);
-			if(item.insertRow(1,i)) cout<<"ok"<<endl;
-			else cout<<"wrong"<<endl;
-			cout<<"apres"<<endl;
-			//string s =item.item(i.row())->data().toString().toStdString();
-			cout<<"remove : "<<endl;
-			//cout << s << endl;
-			//bool valid = file.exists();
-			//bool valid = file.remove();
-			item.removeRow(i.row());
-			//plus virer de bdd DELETE(string)
+            QString s = i.data(0).toString();
+            cout<<"s=" << s.toStdString()<< endl;
+            cout<<"tour"<<endl;
+            QFile file(s);
+            if(file.exists()) cout <<"file "<<s.toStdString()<<" exists"<<endl;
+            else cout<<"file doesn't exist"<<endl;
+            //ui->TableAffichageDoublons->hideRow(i.row());
+            //if(file.remove()) cout <<"file "<<s.toStdString()<<" deleted"<<endl;
+            //else cout<<"file "<<s.toStdString()<<" NOT deleted";
+            //plus virer de bdd DELETE(string)
+            //Sql* mabase = Sql::getInstance();
+            //mabase->sqlDelete(s.toStdString());
 		}
+        //à la fin des suppressions, on rafraichit
+        on_Buttonrafraichir_clicked();
 	}
 	catch (...){
 
@@ -271,4 +276,14 @@ void MainWindow::on_Buttonmasquer_clicked()
     QModelIndexList indexes = lignes->selectedIndexes();
     for(QModelIndex i :indexes)
         ui->TableAffichageDoublons->hideRow(i.row());
+}
+
+void MainWindow::on_quitButton_clicked()
+{
+    if(scan->isRunning()){
+        scan->exit();
+        Parcours *p  = Parcours::getInstance();
+        p->countApprox();
+        p->regenerateFicCfg();
+    }
 }

@@ -7,16 +7,18 @@
 
 int Parcours::AVANCE = 0;
 Parcours* Parcours::_instance=NULL;
-
+enum State{waitWL=0, scanWL=1,scanBL=2, getNbDBfic=3,errorStatus=4};
 Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
     cout<<"Parcours::Parcours()"<<endl;
     ifstream config(chemin.c_str(), ios_base::in);
     if (config) {
 		string ligne;
-        char mode=0;
+        char etat=0;
         // 0 : on attends de trouver liste blanche
-        // 1: on insère dans liste blanche
-        // 2: on insère dans liste noire
+        // 1 : on insère dans liste blanche
+        // 2 : on insère dans liste noire
+        // 3 : on recupere le nombre de fichiers
+        // 4 : on verifie si erreur lors de la derniere fermeture
         //cout<<"debut while : "<<endl;
 		while (getline(config, ligne)) {
 			if (ligne[0] == '#')
@@ -24,44 +26,55 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 			if (ligne == "scannercaches=1"){
 				scannercaches=true;
 				continue;
-			}
-			if (mode == 0 && ligne != "listeblanche")
+            }
+            if (etat == waitWL && ligne != "listeblanche")
 				continue;
-			if (mode == 0 && ligne == "listeblanche"){
-				mode=1;
+            if (etat == waitWL && ligne == "listeblanche"){
+                etat=scanWL;
 				continue;
 			}
-			if (mode == 1 && ligne != "listenoire") {
+            if (etat == scanWL && ligne != "listenoire") {
 				cout<<"listeBlanche mise à jour"<<endl;
 				addToWL(ligne);
 				continue;
 			}
-			if (mode == 1 && ligne == "listenoire") {
-				mode=2;
+            if (etat == scanWL && ligne == "listenoire") {
+                etat=scanBL;
 				continue;
 			}
-			if (mode == 2 && ligne != "nombreapprox") {
+            if (etat == scanBL && ligne != "nombreapprox") {
                 cout<<"listeNoire mise à jour"<<endl;
                 addToBL(ligne);
 				continue;
 			}
-			if (mode == 2 && ligne == "nombreapprox") {
-				mode=3;
+            if (etat == scanBL && ligne == "nombreapprox") {
+                etat=getNbDBfic;
 				continue;
 			}
-			if (mode == 3 ) {
-				if (ligne == "0"){
+            if (etat == getNbDBfic ) {
+                if (ligne == "0"){
                     nbApprox=0;
 					countApprox();
 					continue;
 				}
+                else if(ligne == "error"){
+                    etat = errorStatus;
+                    continue;
+                    }
 				else {
 					QString s=QString::fromStdString(ligne);
                     nbApprox=s.toDouble();
 					AVANCE=100;
 					continue;
-				}
+                    }
 			}
+            if(etat == errorStatus){
+                QString s = QString::fromStdString(ligne);
+                if(s.toDouble()){
+                    cout << "dernier scan interrompu" << endl;
+                    countApprox();
+                }
+            }
 
 		}
         //cout<<"fin while"<<endl;
@@ -258,7 +271,9 @@ bool Parcours::isHidden(const path& p) {
 	return true;
 }
 
-void Parcours::resetFicCfg() {
+//error implanté pour eventuellement faire un reset auto de la config si plante
+//mais non utilisé pour l'instant
+void Parcours::resetFicCfg(int8_t error) {
 	cout<<"Parcours::resetFicCfg()\n"<<endl;
 	ofstream config(cheminFicCfg, ios_base::out);
 	if (config) {
@@ -270,14 +285,16 @@ void Parcours::resetFicCfg() {
 			   << "/boot" << endl
 			   << "/etc" << endl
 			   << "nombreapprox" << endl
-			   << "0" << endl;
+               << "0" << endl
+               << "error" << endl
+               << error <<endl;
 		config.close();
 	}
 	else cout << "Erreur ouverture fichier config (" << "./config.cfg" << ")." << endl;
 	cout<<"fin Parcours::Parcours()"<<endl;
 }
 
-void Parcours::regenerateFicCfg(bool err) {
+void Parcours::regenerateFicCfg(int err) {
 	cout<<"Parcours::regenerateFicCfg()\n"<<endl;
 	ofstream config(cheminFicCfg, ios_base::out);
 	if (config) {
@@ -293,10 +310,8 @@ void Parcours::regenerateFicCfg(bool err) {
 		for(;it!=fin;it++){
 			config << (*it).first << endl;
 		}
-		if (!err)
-			config << "nombreapprox" << endl << nbApprox << endl;
-		else
-			config << "nombreapprox" << endl << "0" << endl;
+        config << "nombreapprox" << endl << nbApprox << endl;
+        config << "error" << endl << err << endl;
 		if(scannercaches){
 			cout << "scannercaches=1" << endl;
 		}

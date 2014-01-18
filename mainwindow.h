@@ -50,6 +50,8 @@ private slots:
 
     void on_Buttonmasquer_clicked();
 
+    void on_quitButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 	About *popup;

@@ -44,7 +44,7 @@ class Parcours
         void voirWL();
         void voirBL();
 		void addToWL(string chemin);
-        void addToBL(string chemin);//normalement ne sert à rien
+        void addToBL(string chemin);
         const double& getNbApprox(){/*countApprox();*/return nbApprox;}
 		void rmvFromWL(string chemin);
 		void rmvFromBL(string chemin);
@@ -55,8 +55,8 @@ class Parcours
 		void runFromPath(const pair<string, path *> & thePair, bool countOnly=false);
         bool isInBlacklist(const path &p);
 		bool isHidden(const path & p);
-        void resetFicCfg();
-		void regenerateFicCfg(bool err=false);
+        void resetFicCfg(int8_t error=0);
+        void regenerateFicCfg(int err=0);
 		void countApprox();
         QSqlQueryModel *sqlSelect(string requete = "SELECT * FROM Fichiers WHERE MD5 IN (SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1)");
 		~Parcours();
