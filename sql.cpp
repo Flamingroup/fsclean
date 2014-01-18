@@ -227,7 +227,6 @@ bool Sql::sqlSetMd5(Fichier& f) {
 }
 
 bool Sql::sqlDelete(string chemin) {
-
     cout<<"Sql::sqlDelete"<<endl;
     if (!db.open()) {
         cerr << "Error occurred opening the database." << endl;

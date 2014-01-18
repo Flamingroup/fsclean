@@ -243,6 +243,7 @@ void MainWindow::on_Buttonrafraichir_clicked()
 
 void MainWindow::on_Buttonsupprimer_clicked()
 {
+<<<<<<< HEAD
 	cout<<"debut"<<endl;
 	//todo : gérer suppression (multiple)
 	try {
@@ -266,8 +267,35 @@ void MainWindow::on_Buttonsupprimer_clicked()
         on_Buttonrafraichir_clicked();
 	}
 	catch (...){
+=======
+		cout<<"debut"<<endl;
+		//todo : gérer suppression (multiple)
+		try {
+			QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
+			QModelIndexList indexes = lignes->selectedIndexes();
+			for(QModelIndex i :indexes){
+				QString s = i.data(0).toString();
+				cout<<"s=" << s.toStdString()<< endl;
+				cout<<"tour"<<endl;
+				QFile file(s);
+				if(file.exists()){
+					Sql* mabase = Sql::getInstance();
+					mabase->sqlDelete(s.toStdString());
+					if(file.remove()){
+						cout << s.toStdString() << " a été supprimé du disque." << endl;
+					}
+				}
+				else {
+					cout << s.toStdString() << " file doesn't exist, we do nothing." << endl;
+				}
+			}
+		//à la fin des suppressions, on rafraichit
+			on_Buttonrafraichir_clicked();
+		}
+		catch (...){
+>>>>>>> 0bb598a5c70efc248534b581eeb45200fae6adbc
 
-	}
+		}
 }
 
 void MainWindow::on_Buttonmasquer_clicked()
