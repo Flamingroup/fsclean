@@ -38,14 +38,22 @@ Sql::Sql(path* p) {
 	QSqlQuery query(db);
 	query.prepare("CREATE TABLE IF NOT EXISTS Fichiers (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, chemin TEXT UNIQUE, filenametrime TEXT, poids INTEGER, dateModif INTEGER, MD5 TEXT, stillexist INTEGER)");
 	mutex.lock();
-    if (!query.exec()) {
+	if (!query.exec()) {
 		cerr << "Error occurred creating table." << endl;
 		db.close();
 		unlink(p->string().c_str());
 		mutex.unlock();
 		throw 3;
 	}
-    mutex.unlock();
+	query.prepare("CREATE TABLE IF NOT EXISTS Dossiers (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, chemin TEXT UNIQUE, stillexist INTEGER)");
+	if (!query.exec()) {
+		cerr << "Error occurred creating table." << endl;
+		db.close();
+		unlink(p->string().c_str());
+		mutex.unlock();
+		throw 4;
+	}
+	mutex.unlock();
 	db.close();
 	return;
 }
@@ -71,7 +79,7 @@ char Sql::sqlInsert(const Fichier& f){
 	QSqlQuery query(db);
 	query.prepare("SELECT * FROM Fichiers WHERE chemin = :chemin");
 	query.bindValue(":chemin", (QString)f.getChemin().string().c_str());
-    mutex.lock();
+	mutex.lock();
 	if (!query.exec()) {
 		cerr << "Error occurred SELECT." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
@@ -79,7 +87,7 @@ char Sql::sqlInsert(const Fichier& f){
 	}
 	if (query.next()) {
 		if (f.getDateModif() != (quint32)query.value(4).toULongLong() || f.getPoids() != (quint64)query.value(3).toULongLong()) {
-            //cout << "Supression des anciens fichiers" << endl;
+			//cout << "Supression des anciens fichiers" << endl;
 			QSqlQuery query2(db);
 			query2.prepare("DELETE FROM Fichiers WHERE id = :id");
 			query2.bindValue(":id", query.value(0).toInt());
@@ -94,11 +102,11 @@ char Sql::sqlInsert(const Fichier& f){
 			query2.prepare("UPDATE Fichiers SET stillexist = 1 WHERE id = :id");
 			query2.bindValue(":id", query.value(0).toInt());
 			if (!query2.exec()) {
-				cerr << "Error occurred while RAZing the flag." << query2.lastError().driverText().toStdString() << " " << query2.lastQuery().toStdString() << endl;
+				cerr << "Error occurred while Updating the flag." << query2.lastError().driverText().toStdString() << " " << query2.lastQuery().toStdString() << endl;
 				mutex.unlock();
 				return -1;
 			}
-            //cout << "Rien à faire, fichier déjà dans la base" << endl;
+			//cout << "Rien à faire, fichier déjà dans la base" << endl;
 			db.close();
 			cout << "noerror" << endl;
 			mutex.unlock();
@@ -119,14 +127,120 @@ char Sql::sqlInsert(const Fichier& f){
 	}
 	mutex.unlock();
 	db.close();
-    //cout << "Fichier inséré ou MAJ sans erreurs" << endl;
+	//cout << "Fichier inséré ou MAJ sans erreurs" << endl;
 	cout << "noerror" << endl;
 	return 0;
 }
 
+char Sql::sqlInsert(const Fichier& f){
+	cout << "sqlInsert" << endl;
+	if (!db.open()) {
+		cerr << "Error occurred opening the database." << endl;
+		return -1;
+	}
+	QSqlQuery query(db);
+	query.prepare("SELECT * FROM Fichiers WHERE chemin = :chemin");
+	query.bindValue(":chemin", (QString)f.getChemin().string().c_str());
+	mutex.lock();
+	if (!query.exec()) {
+		cerr << "Error occurred SELECT." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+		mutex.unlock();
+		return -1;
+	}
+	if (query.next()) {
+		if (f.getDateModif() != (quint32)query.value(4).toULongLong() || f.getPoids() != (quint64)query.value(3).toULongLong()) {
+			//cout << "Supression des anciens fichiers" << endl;
+			QSqlQuery query2(db);
+			query2.prepare("DELETE FROM Fichiers WHERE id = :id");
+			query2.bindValue(":id", query.value(0).toInt());
+			if (!query2.exec()) {
+				cerr << "Error occurred deleting." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+				mutex.unlock();
+				return -1;
+			}
+		}
+		else {
+			QSqlQuery query2(db);
+			query2.prepare("UPDATE Fichiers SET stillexist = 1 WHERE id = :id");
+			query2.bindValue(":id", query.value(0).toInt());
+			if (!query2.exec()) {
+				cerr << "Error occurred while Updating the flag." << query2.lastError().driverText().toStdString() << " " << query2.lastQuery().toStdString() << endl;
+				mutex.unlock();
+				return -1;
+			}
+			//cout << "Rien à faire, fichier déjà dans la base" << endl;
+			db.close();
+			cout << "noerror" << endl;
+			mutex.unlock();
+			return 0;
+		}
+	}
+	mutex.unlock();
+	query.prepare("INSERT INTO Fichiers (chemin, filenametrime, poids, dateModif, stillexist) VALUES (:chemin, :filenametrime, :poids, :date, 1)");
+	query.bindValue(":chemin", QString(f.getChemin().string().c_str()));
+	query.bindValue(":filenametrime", QString(f.getfilenameTrime().c_str()));
+	query.bindValue(":poids", QVariant(quint64(f.getPoids())));
+	query.bindValue(":date", f.getDateModif());
+	mutex.lock();
+	if (!query.exec()) {
+		cerr << "Error occurred inserting." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+		mutex.unlock();
+		return -1;
+	}
+	mutex.unlock();
+	db.close();
+	//cout << "Fichier inséré ou MAJ sans erreurs" << endl;
+	cout << "noerror" << endl;
+	return 0;
+}
+
+char Sql::sqlInsertDossier(const string& str){
+	cout << "sqlInsertDossier" << endl;
+	if (!db.open()) {
+		cerr << "Error occurred opening the database." << endl;
+		return -1;
+	}
+	QSqlQuery query(db);
+	query.prepare("SELECT * FROM Dossiers WHERE chemin = :chemin");
+	query.bindValue(":chemin", QString(str.c_str());
+	mutex.lock();
+	if (!query.exec()) {
+		cerr << "Error occurred SELECTing Dossiers." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+		mutex.unlock();
+		return -1;
+	}
+	if (query.next()) {
+		QSqlQuery query2(db);
+		query2.prepare("UPDATE Dossiers SET stillexist = 1 WHERE id = :id");
+		query2.bindValue(":id", query.value(0).toInt());
+		if (!query2.exec()) {
+			cerr << "Error occurred while Updating the flag of dossiers." << query2.lastError().driverText().toStdString() << " " << query2.lastQuery().toStdString() << endl;
+			mutex.unlock();
+			return -1;
+		}
+		//cout << "Rien à faire, fichier déjà dans la base" << endl;
+		db.close();
+		cout << "noerror" << endl;
+		mutex.unlock();
+		return 0;
+	}
+	mutex.unlock();
+	query.prepare("INSERT INTO Dossiers (chemin, stillexist) VALUES (:chemin, 1)");
+	query.bindValue(":chemin", QString(str.c_str()));
+	mutex.lock();
+	if (!query.exec()) {
+		cerr << "Error occurred inserting in dossiers." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+		mutex.unlock();
+		return -1;
+	}
+	mutex.unlock();
+	db.close();
+	//cout << "Dossier inséré sans erreur" << endl;
+	cout << "noerror" << endl;
+	return 0;
+}
 
 void Sql::sqlDelDeletedFiles() {
-
 	cout << "sqlDelDeletedFiles" << endl;
 	if (!db.open()) {
 		cerr << "Error occurred opening the database." << endl;
@@ -134,8 +248,14 @@ void Sql::sqlDelDeletedFiles() {
 	}
 	QSqlQuery query(db);
 	query.prepare("DELETE FROM Fichiers WHERE stillexist = 0");
-    mutex.lock();
-        if (!query.exec()) {
+	mutex.lock();
+	if (!query.exec()) {
+		cerr << "Error occurred deleting deleted files." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+		mutex.unlock();
+		return;
+	}
+	query.prepare("DELETE FROM Dossiers WHERE stillexist = 0");
+	if (!query.exec()) {
 		cerr << "Error occurred deleting deleted files." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
 		return;
@@ -156,6 +276,12 @@ void Sql::sqlRaz() {
 	query.prepare("UPDATE Fichiers SET stillexist = 0");
     mutex.lock();
     if (!query.exec()) {
+		cerr << "Error occurred while RAZing the flag." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+		mutex.unlock();
+		return;
+	}
+	query.prepare("UPDATE Dossiers SET stillexist = 0");
+	if (!query.exec()) {
 		cerr << "Error occurred while RAZing the flag." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
 		return;
