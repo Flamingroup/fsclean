@@ -13,9 +13,9 @@ private :
 		Sql(path* p=new path("fsclean.db"));
         QMutex mutex;
 public:
-        string MD5 = "SELECT chemin, filenametrime, poids, datemodif, MD5 FROM Fichiers WHERE(MD5 IN(SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1))";
-        string filenametrime = "SELECT chemin, filenametrime, poids, datemodif, MD5 FROM Fichiers filenametrime IN (SELECT filenametrime FROM Fichiers WHERE 1 GROUP BY filenametrime HAVING COUNT(filenametrime)>1) ORDER BY MD5,chemin";
-        string dossier = "SELECT chemin FROM Dossiers WHERE isdoublon = 1";
+        string MD5 = "SELECT chemin, filenametrime, poids, datemodif, MD5 FROM Fichiers WHERE(MD5 IN(SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1))ORDER BY MD5,chemin";
+        string filenametrime = "SELECT chemin, filenametrime, poids, datemodif FROM Fichiers WHERE filenametrime IN (SELECT filenametrime FROM Fichiers WHERE 1 GROUP BY filenametrime HAVING COUNT(filenametrime)>1) ORDER BY filenametrime,chemin";
+        string dossier = "SELECT chemin FROM Dossiers WHERE isdoublon = 1 ORDER BY chemin";
 		static Sql* getInstance();
 		char sqlInsert(const Fichier &);
 		char sqlInsertDossier(const string& str);

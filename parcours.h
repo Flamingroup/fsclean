@@ -45,7 +45,7 @@ class Parcours
         void voirBL();
 		void addToWL(string chemin);
         void addToBL(string chemin);
-        const double& getNbApprox(){/*countApprox();*/return nbApprox;}
+        const double& getNbApprox(){return nbApprox;}
 		void rmvFromWL(string chemin);
 		void rmvFromBL(string chemin);
 		/**

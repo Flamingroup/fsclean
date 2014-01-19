@@ -133,7 +133,7 @@ char Sql::sqlInsert(const Fichier& f){
 }
 
 char Sql::sqlInsertDossier(const string& str){
-	cout << "sqlInsertDossier" << endl;
+    cout << "sqlInsertDossier de "<< str << endl;
 	if (!db.open()) {
 		cerr << "Error occurred opening the database." << endl;
 		return -1;
@@ -296,7 +296,7 @@ bool Sql::sqlDelete(string chemin) {
         return false;
     }
     QSqlQuery query(db);
-	query.prepare("DETETE FROM Fichiers WHERE chemin = :chemin");
+    query.prepare("DELETE FROM Fichiers WHERE chemin = :chemin");
 	query.bindValue(":chemin", QString(chemin.c_str()));
     mutex.lock();
     if (!query.exec()) {
@@ -409,7 +409,7 @@ bool Sql::sqlSetDossierDoublons(){
 
 
 QSqlQueryModel* Sql::sqlSelectDoublons(string select){
-    cout << "sql::sqlSelectDoublonsMD5" << endl;
+    cout << "sql::sqlSelectDoublons" << endl << "query = " << select <<endl;
     QSqlQueryModel* model = new QSqlQueryModel();
     if (!db.open()) {
         cerr << "Error occurred opening the database." << endl;
@@ -419,7 +419,7 @@ QSqlQueryModel* Sql::sqlSelectDoublons(string select){
     query.prepare(QString(select.c_str()));
     mutex.lock();
     if (!query.exec()) {
-        cerr << "Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+        cerr << "Error occurred while selecting doublons. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
         mutex.unlock();
         return 0;
     }
