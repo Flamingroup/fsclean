@@ -17,23 +17,11 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {  
-<<<<<<< HEAD
     ///GUI
     QApplication app(argc,argv);
     MainWindow fenetre;
     fenetre.show();
     return app.exec();
-
     //Parcours* parc=Parcours::getInstance();
     //parc->runAll();
-=======
-    ///soon
-	QApplication app(argc,argv);
-	MainWindow fenetre;
-	fenetre.show();
-	return app.exec();
-
-//	Parcours* parc=Parcours::getInstance();
-//	parc->runAll();
->>>>>>> 0bb598a5c70efc248534b581eeb45200fae6adbc
 }

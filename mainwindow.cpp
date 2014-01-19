@@ -32,7 +32,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	displayNbElemBDDInStatusBar();
 	ui->progressBar->setValue(Parcours::AVANCE);
 	on_Buttonrafraichir_clicked();
-    ui->TableAffichageDoublons->resizeColumnsToContents();
+    ui->tableDoublonsFicS->resizeColumnsToContents();
+    ui->tableDoublonsFicP->resizeColumnsToContents();
+    ui->tableDoublonsD->resizeColumnsToContents();
     cout<<"FIN Initialisation GUI\n"<<endl;
 }
 
@@ -225,17 +227,17 @@ void MainWindow::on_Buttonrafraichir_clicked()
     }
 	static bool prem = true;
 	if(! prem){
-		ui->TableAffichageDoublons->selectAll();
-		QItemSelectionModel * table = ui->TableAffichageDoublons->selectionModel();
+        ui->tableDoublonsFicS->selectAll();
+        QItemSelectionModel * table = ui->tableDoublonsFicS->selectionModel();
 		QModelIndexList indexes = table->selectedIndexes();
 		for(QModelIndex i :indexes)
-			ui->TableAffichageDoublons->showRow(i.row());
+            ui->tableDoublonsFicS->showRow(i.row());
 	}
 	if (!scan->isRunning()){
         cout<<"scan not running" <<endl;
 		Sql* mabase=Sql::getInstance();
-		QSqlQueryModel *reponse = mabase->sqlSelect();
-		ui->TableAffichageDoublons->setModel(reponse);
+        QSqlQueryModel *reponse = mabase->sqlSelectDoublonsMD5();
+        ui->tableDoublonsFicS->setModel(reponse);
 	}
     prem = false;
     cout<<"fin rafraichir"<<endl;
@@ -243,35 +245,10 @@ void MainWindow::on_Buttonrafraichir_clicked()
 
 void MainWindow::on_Buttonsupprimer_clicked()
 {
-<<<<<<< HEAD
-	cout<<"debut"<<endl;
-	//todo : gérer suppression (multiple)
-	try {
-		QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
-		QModelIndexList indexes = lignes->selectedIndexes();
-		for(QModelIndex i :indexes){
-            QString s = i.data(0).toString();
-            cout<<"s=" << s.toStdString()<< endl;
-            cout<<"tour"<<endl;
-            QFile file(s);
-            if(file.exists()) cout <<"file "<<s.toStdString()<<" exists"<<endl;
-            else cout<<"file doesn't exist"<<endl;
-            //ui->TableAffichageDoublons->hideRow(i.row());
-            //if(file.remove()) cout <<"file "<<s.toStdString()<<" deleted"<<endl;
-            //else cout<<"file "<<s.toStdString()<<" NOT deleted";
-            //plus virer de bdd DELETE(string)
-            //Sql* mabase = Sql::getInstance();
-            //mabase->sqlDelete(s.toStdString());
-		}
-        //à la fin des suppressions, on rafraichit
-        on_Buttonrafraichir_clicked();
-	}
-	catch (...){
-=======
 		cout<<"debut"<<endl;
 		//todo : gérer suppression (multiple)
 		try {
-			QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
+            QItemSelectionModel * lignes = ui->tableDoublonsFicS->selectionModel();
 			QModelIndexList indexes = lignes->selectedIndexes();
 			for(QModelIndex i :indexes){
 				QString s = i.data(0).toString();
@@ -293,17 +270,15 @@ void MainWindow::on_Buttonsupprimer_clicked()
 			on_Buttonrafraichir_clicked();
 		}
 		catch (...){
->>>>>>> 0bb598a5c70efc248534b581eeb45200fae6adbc
-
 		}
 }
 
 void MainWindow::on_Buttonmasquer_clicked()
 {
-    QItemSelectionModel * lignes = ui->TableAffichageDoublons->selectionModel();
+    QItemSelectionModel * lignes = ui->tableDoublonsFicS->selectionModel();
     QModelIndexList indexes = lignes->selectedIndexes();
     for(QModelIndex i :indexes)
-        ui->TableAffichageDoublons->hideRow(i.row());
+        ui->tableDoublonsFicS->hideRow(i.row());
 }
 
 void MainWindow::on_quitButton_clicked()
