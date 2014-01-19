@@ -245,10 +245,11 @@ void MainWindow::on_Buttonrafraichir_clicked()
         }
         else if(ui->tabWidget->currentIndex() == 1){//case 2nd tab
             ui->tableDoublonsFicP->selectAll();
-            QItemSelectionModel * table1 = ui->tableDoublonsFicP->selectionModel();
-            QModelIndexList indexes1 = table1->selectedIndexes();
-            for(QModelIndex i1 :indexes1)
-                ui->tableDoublonsFicP->showRow(i1.row());
+
+            QItemSelectionModel * table = ui->tableDoublonsFicP->selectionModel();
+            QModelIndexList indexes = table->selectedIndexes();
+            for(QModelIndex i :indexes)
+                ui->tableDoublonsFicP->showRow(i.row());
         }/*
         else if(ui->tabWidget->currentIndex() == 2){//case 3rd tab
             cout << "ok ou pas?" << endl;
