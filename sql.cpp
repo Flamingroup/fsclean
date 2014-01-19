@@ -45,7 +45,7 @@ Sql::Sql(path* p) {
 		mutex.unlock();
 		throw 3;
 	}
-	query.prepare("CREATE TABLE IF NOT EXISTS Dossiers (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, chemin TEXT UNIQUE, stillexist INTEGER)");
+	query.prepare("CREATE TABLE IF NOT EXISTS Dossiers (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, chemin TEXT UNIQUE, stillexist INTEGER, isdoublon INTEGER)");
 	if (!query.exec()) {
 		cerr << "Error occurred creating table." << endl;
 		db.close();
@@ -132,68 +132,6 @@ char Sql::sqlInsert(const Fichier& f){
 	return 0;
 }
 
-char Sql::sqlInsert(const Fichier& f){
-	cout << "sqlInsert" << endl;
-	if (!db.open()) {
-		cerr << "Error occurred opening the database." << endl;
-		return -1;
-	}
-	QSqlQuery query(db);
-	query.prepare("SELECT * FROM Fichiers WHERE chemin = :chemin");
-	query.bindValue(":chemin", (QString)f.getChemin().string().c_str());
-	mutex.lock();
-	if (!query.exec()) {
-		cerr << "Error occurred SELECT." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
-		mutex.unlock();
-		return -1;
-	}
-	if (query.next()) {
-		if (f.getDateModif() != (quint32)query.value(4).toULongLong() || f.getPoids() != (quint64)query.value(3).toULongLong()) {
-			//cout << "Supression des anciens fichiers" << endl;
-			QSqlQuery query2(db);
-			query2.prepare("DELETE FROM Fichiers WHERE id = :id");
-			query2.bindValue(":id", query.value(0).toInt());
-			if (!query2.exec()) {
-				cerr << "Error occurred deleting." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
-				mutex.unlock();
-				return -1;
-			}
-		}
-		else {
-			QSqlQuery query2(db);
-			query2.prepare("UPDATE Fichiers SET stillexist = 1 WHERE id = :id");
-			query2.bindValue(":id", query.value(0).toInt());
-			if (!query2.exec()) {
-				cerr << "Error occurred while Updating the flag." << query2.lastError().driverText().toStdString() << " " << query2.lastQuery().toStdString() << endl;
-				mutex.unlock();
-				return -1;
-			}
-			//cout << "Rien à faire, fichier déjà dans la base" << endl;
-			db.close();
-			cout << "noerror" << endl;
-			mutex.unlock();
-			return 0;
-		}
-	}
-	mutex.unlock();
-	query.prepare("INSERT INTO Fichiers (chemin, filenametrime, poids, dateModif, stillexist) VALUES (:chemin, :filenametrime, :poids, :date, 1)");
-	query.bindValue(":chemin", QString(f.getChemin().string().c_str()));
-	query.bindValue(":filenametrime", QString(f.getfilenameTrime().c_str()));
-	query.bindValue(":poids", QVariant(quint64(f.getPoids())));
-	query.bindValue(":date", f.getDateModif());
-	mutex.lock();
-	if (!query.exec()) {
-		cerr << "Error occurred inserting." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
-		mutex.unlock();
-		return -1;
-	}
-	mutex.unlock();
-	db.close();
-	//cout << "Fichier inséré ou MAJ sans erreurs" << endl;
-	cout << "noerror" << endl;
-	return 0;
-}
-
 char Sql::sqlInsertDossier(const string& str){
 	cout << "sqlInsertDossier" << endl;
 	if (!db.open()) {
@@ -211,7 +149,7 @@ char Sql::sqlInsertDossier(const string& str){
 	}
 	if (query.next()) {
 		QSqlQuery query2(db);
-		query2.prepare("UPDATE Dossiers SET stillexist = 1 WHERE id = :id");
+		query2.prepare("UPDATE Dossiers SET stillexist = 1, isdoublon = 0 WHERE id = :id");
 		query2.bindValue(":id", query.value(0).toInt());
 		if (!query2.exec()) {
 			cerr << "Error occurred while Updating the flag of dossiers." << query2.lastError().driverText().toStdString() << " " << query2.lastQuery().toStdString() << endl;
@@ -225,7 +163,7 @@ char Sql::sqlInsertDossier(const string& str){
 		return 0;
 	}
 	mutex.unlock();
-	query.prepare("INSERT INTO Dossiers (chemin, stillexist) VALUES (:chemin, 1)");
+	query.prepare("INSERT INTO Dossiers (chemin, stillexist, isdoublon) VALUES (:chemin, 1, 0)");
 	query.bindValue(":chemin", QString(str.c_str()));
 	mutex.lock();
 	if (!query.exec()) {
@@ -266,7 +204,6 @@ void Sql::sqlDelDeletedFiles() {
 }
 
 void Sql::sqlRaz() {
-
 	cout << "sqlRAZ" << endl;
 	if (!db.open()) {
 		cerr << "Error occurred opening the database." << endl;
@@ -280,7 +217,7 @@ void Sql::sqlRaz() {
 		mutex.unlock();
 		return;
 	}
-	query.prepare("UPDATE Dossiers SET stillexist = 0");
+	query.prepare("UPDATE Dossiers SET stillexist = 0, isdoublon = 0");
 	if (!query.exec()) {
 		cerr << "Error occurred while RAZing the flag." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
@@ -374,7 +311,6 @@ bool Sql::sqlDelete(string chemin) {
 }
 
 bool Sql::sqlCreateMD5(){
-
     cout << "sql::sqlCreateMD5" << endl;
 	list<Fichier*> lf;
 	Fichier* tmp;
@@ -411,26 +347,133 @@ bool Sql::sqlCreateMD5(){
     return false;
 }
 
-
-QSqlQueryModel* Sql::sqlSelect(string requete){
-
-    cout<<"sql::sqlSelect"<<endl;
-	QSqlQueryModel* model = new QSqlQueryModel();
-    if (!db.open()) {
-        cerr << "Error occurred opening the database." << endl;
-        return 0;
-    }
-    QSqlQuery query(db);
-    query.prepare(QString::fromStdString(requete));
-    mutex.lock();
-    if (!query.exec()) {
-        cerr << "Error occurred while Deleting the file. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+bool Sql::isDossierDoublon(const string& chemin){
+	QSqlQuery query(db);
+	query.prepare(QString("SELECT COUNT(*), FROM Fichiers WHERE chemin LIKE :chemin% and MD5 IS NULL))"));
+	query.bindValue(":chemin", QString(chemin.c_str()));
+	if (!query.exec()) {
+		cerr << "Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
-        return 0;
-    }
-	model->setQuery(query);
-    mutex.unlock();
-    db.close();
-    //cout << "noerror" << endl;
-    return model;
+		return 0;
+	}
+	db.close();
+	if (query.value(0).toInt() == 0){
+		return false;
+	}
+	else return true;
+	db.close();
 }
+
+bool Sql::sqlSetDossierDoublons(){
+	cout << "sql::sqlSetDossierDoublons" << endl;
+	list<string> ls;
+	if (!db.open()) {
+		cerr << "Error occurred opening the database." << endl;
+		return 0;
+	}
+	QSqlQuery query(db);
+	query.prepare(QString("SELECT chemin, FROM Dossiers"));
+	mutex.lock();
+	if (!query.exec()) {
+		cerr << "Error occurred while setting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+		mutex.unlock();
+		return 0;
+	}
+	while (query.next()) {
+		lf.push_back(query.value(0));
+	}
+	mutex.unlock();
+	list<string>::iterator it = ls.begin();
+	list<string>::iterator fin = ls.end();
+	while (it != fin) {
+		if (isDossierDoublon(*it)){
+			query.prepare(QString("UPDATE Dossiers SET isdoublon = 1 WHERE chemin = :chemin"));
+			query.bindValue(":chemin", QString((*it).c_str()));
+			mutex.lock();
+			if (!query.exec()) {
+				cerr << "Error occurred while Updating flag doublons dossier. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+			}
+			mutex.unlock();
+		}
+		it = ls.erase(it);
+	}
+	db.close();
+	//cout << "noerror" << endl;
+	return model;
+}
+
+QSqlQueryModel* Sql::sqlSelectDoublonsMD5(){
+	cout << "sql::sqlSelectDoublonsMD5" << endl;
+	QSqlQueryModel* model = new QSqlQueryModel();
+	if (!db.open()) {
+		cerr << "Error occurred opening the database." << endl;
+		return 0;
+	}
+	QSqlQuery query(db);
+	query.prepare(QString("SELECT chemin, filenametrime, poids, datemodif, MD5 FROM Fichiers WHERE(MD5 IN(SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1))"));
+	mutex.lock();
+	if (!query.exec()) {
+		cerr << "Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+		mutex.unlock();
+		return 0;
+	}
+	model->setQuery(query);
+	while (model->canFetchMore()){
+		model->fetchMore();
+	}
+	mutex.unlock();
+	db.close();
+	//cout << "noerror" << endl;
+	return model;
+}
+
+QSqlQueryModel* Sql::sqlSelectDoublonsFilenametrime(){
+	cout << "sql::sqlSelectDoublonsFilenametrime" << endl;
+	QSqlQueryModel* model = new QSqlQueryModel();
+	if (!db.open()) {
+		cerr << "Error occurred opening the database." << endl;
+		return 0;
+	}
+	QSqlQuery query(db);
+	query.prepare(QString("SELECT chemin, filenametrime, poids, datemodif, MD5 FROM Fichiers filenametrime IN (SELECT filenametrime FROM Fichiers WHERE 1 GROUP BY filenametrime HAVING COUNT(filenametrime)>1) ORDER BY MD5,chemin"));
+	mutex.lock();
+	if (!query.exec()) {
+		cerr << "Error occurred while selecting doublons Filenametrime. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+		mutex.unlock();
+		return 0;
+	}
+	model->setQuery(query);
+	while (model->canFetchMore()){
+		model->fetchMore();
+	}
+	mutex.unlock();
+	db.close();
+	//cout << "noerror" << endl;
+	return model;
+}
+
+QSqlQueryModel* Sql::sqlSelectDossiersDoublons(){
+	cout << "sql::sqlSelectDossiersDoublons" << endl;
+	QSqlQueryModel* model = new QSqlQueryModel();
+	if (!db.open()) {
+		cerr << "Error occurred opening the database." << endl;
+		return 0;
+	}
+	QSqlQuery query(db);
+	query.prepare(QString("SELECT chemin FROM Dossiers WHERE isdoublon = 1"));
+	mutex.lock();
+	if (!query.exec()) {
+		cerr << "Error occurred while selecting doublons Dossier. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+		mutex.unlock();
+		return 0;
+	}
+	model->setQuery(query);
+	while (model->canFetchMore()){
+		model->fetchMore();
+	}
+	mutex.unlock();
+	db.close();
+	//cout << "noerror" << endl;
+	return model;
+}
+
