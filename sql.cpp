@@ -351,17 +351,22 @@ bool Sql::isDossierDoublon(const string& chemin){
 	QSqlQuery query(db);
 	query.prepare(QString("SELECT COUNT(*), FROM Fichiers WHERE chemin LIKE :chemin% and MD5 IS NULL))"));
 	query.bindValue(":chemin", QString(chemin.c_str()));
+	mutex.lock();
 	if (!query.exec()) {
 		cerr << "Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
 		return 0;
 	}
-	db.close();
 	if (query.value(0).toInt() == 0){
+		mutex.unlock();
+		db.close();
 		return false;
 	}
-	else return true;
-	db.close();
+	else {
+		mutex.unlock();
+		db.close();
+		return true;
+	}
 }
 
 bool Sql::sqlSetDossierDoublons(){
@@ -380,7 +385,7 @@ bool Sql::sqlSetDossierDoublons(){
 		return 0;
 	}
 	while (query.next()) {
-		lf.push_back(query.value(0));
+		ls.push_back(query.value(0).toString().toStdString());
 	}
 	mutex.unlock();
 	list<string>::iterator it = ls.begin();
@@ -399,10 +404,10 @@ bool Sql::sqlSetDossierDoublons(){
 	}
 	db.close();
 	//cout << "noerror" << endl;
-	return model;
+	return true;
 }
 
-QSqlQueryModel* Sql::sqlSelectDoublonsMD5(){
+QSqlQueryModel* Sql::sqlSelectDoublons(string selectDoublon){
 	cout << "sql::sqlSelectDoublonsMD5" << endl;
 	QSqlQueryModel* model = new QSqlQueryModel();
 	if (!db.open()) {
@@ -410,7 +415,7 @@ QSqlQueryModel* Sql::sqlSelectDoublonsMD5(){
 		return 0;
 	}
 	QSqlQuery query(db);
-	query.prepare(QString("SELECT chemin, filenametrime, poids, datemodif, MD5 FROM Fichiers WHERE(MD5 IN(SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1))"));
+	query.prepare(QString(selectDoublon));
 	mutex.lock();
 	if (!query.exec()) {
 		cerr << "Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
@@ -426,54 +431,3 @@ QSqlQueryModel* Sql::sqlSelectDoublonsMD5(){
 	//cout << "noerror" << endl;
 	return model;
 }
-
-QSqlQueryModel* Sql::sqlSelectDoublonsFilenametrime(){
-	cout << "sql::sqlSelectDoublonsFilenametrime" << endl;
-	QSqlQueryModel* model = new QSqlQueryModel();
-	if (!db.open()) {
-		cerr << "Error occurred opening the database." << endl;
-		return 0;
-	}
-	QSqlQuery query(db);
-	query.prepare(QString("SELECT chemin, filenametrime, poids, datemodif, MD5 FROM Fichiers filenametrime IN (SELECT filenametrime FROM Fichiers WHERE 1 GROUP BY filenametrime HAVING COUNT(filenametrime)>1) ORDER BY MD5,chemin"));
-	mutex.lock();
-	if (!query.exec()) {
-		cerr << "Error occurred while selecting doublons Filenametrime. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
-		mutex.unlock();
-		return 0;
-	}
-	model->setQuery(query);
-	while (model->canFetchMore()){
-		model->fetchMore();
-	}
-	mutex.unlock();
-	db.close();
-	//cout << "noerror" << endl;
-	return model;
-}
-
-QSqlQueryModel* Sql::sqlSelectDossiersDoublons(){
-	cout << "sql::sqlSelectDossiersDoublons" << endl;
-	QSqlQueryModel* model = new QSqlQueryModel();
-	if (!db.open()) {
-		cerr << "Error occurred opening the database." << endl;
-		return 0;
-	}
-	QSqlQuery query(db);
-	query.prepare(QString("SELECT chemin FROM Dossiers WHERE isdoublon = 1"));
-	mutex.lock();
-	if (!query.exec()) {
-		cerr << "Error occurred while selecting doublons Dossier. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
-		mutex.unlock();
-		return 0;
-	}
-	model->setQuery(query);
-	while (model->canFetchMore()){
-		model->fetchMore();
-	}
-	mutex.unlock();
-	db.close();
-	//cout << "noerror" << endl;
-	return model;
-}
-
