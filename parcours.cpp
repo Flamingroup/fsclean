@@ -82,6 +82,7 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 	}
 	else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
 	denom=nbApprox;
+    AVANCE=(denom/nbApprox)*100;
 	regenerateFicCfg();
 	cout<<"fin Parcours::Parcours() " << nbApprox << endl;
 }

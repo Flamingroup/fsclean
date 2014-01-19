@@ -25,12 +25,14 @@ MainWindow::MainWindow(QWidget *parent) :
 	timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(setProgress()));
     connect(scan,SIGNAL(scanFinished()),this,SLOT(FinScan()));
+    connect(ui->tabWidget,SIGNAL(currentChanged(int)),this,SLOT(bloquerSuppr(int)));
     timer->start(100);
     cout<<"Initialisation GUI"<<endl;
 	remplirWL();
 	remplirBL();
 	displayNbElemBDDInStatusBar();
 	ui->progressBar->setValue(Parcours::AVANCE);
+    ui->tabWidget->setCurrentIndex(0);
 	on_Buttonrafraichir_clicked();
     ui->tableDoublonsFicS->resizeColumnsToContents();
     ui->tableDoublonsFicP->resizeColumnsToContents();
@@ -98,7 +100,14 @@ void MainWindow::FinScan()
 {
 	setLEDGreen();
 	displayNbElemBDDInStatusBar();
-	on_Buttonrafraichir_clicked();
+    on_Buttonrafraichir_clicked();
+}
+
+void MainWindow::bloquerSuppr(int index)
+{
+    if(index == 2)
+        ui->Buttonsupprimer->setDisabled(true);
+    else ui->Buttonsupprimer->setEnabled(true);
 }
 
 void MainWindow::setLEDGreen()
@@ -220,40 +229,73 @@ void MainWindow::on_actionA_propos_triggered()
 
 void MainWindow::on_Buttonrafraichir_clicked()
 {
-	cout<<"rafraichir_button"<<endl;
+    cout << endl <<"rafraichir_button index tab vaut = "<<ui->tabWidget->currentIndex()<<endl;
     if (scan->isRunning()){
         cout <<"rafraichissement impo, scan en cours"<<endl;
 		return;
     }
 	static bool prem = true;
-	if(! prem){
-        ui->tableDoublonsFicS->selectAll();
-        QItemSelectionModel * table = ui->tableDoublonsFicS->selectionModel();
-		QModelIndexList indexes = table->selectedIndexes();
-		for(QModelIndex i :indexes)
-            ui->tableDoublonsFicS->showRow(i.row());
-	}
+    if(! prem){
+        if(ui->tabWidget->currentIndex() == 0){//case 1st tab
+            ui->tableDoublonsFicS->selectAll();
+            QItemSelectionModel * table = ui->tableDoublonsFicS->selectionModel();
+            QModelIndexList indexes = table->selectedIndexes();
+            for(QModelIndex i :indexes)
+                ui->tableDoublonsFicS->showRow(i.row());
+        }
+        else if(ui->tabWidget->currentIndex() == 1){//case 2nd tab
+            ui->tableDoublonsFicP->selectAll();
+            QItemSelectionModel * table = ui->tableDoublonsFicP->selectionModel();
+            QModelIndexList indexes = table->selectedIndexes();
+            for(QModelIndex i :indexes)
+                ui->tableDoublonsFicP->showRow(i.row());
+        }/*
+        else if(ui->tabWidget->currentIndex() == 2){//case 3rd tab
+            cout << "ok ou pas?" << endl;
+            ui->tableDoublonsD->selectAll();
+            QItemSelectionModel * table = ui->tableDoublonsD->selectionModel();
+            QModelIndexList indexes = table->selectedIndexes();
+            for(QModelIndex i :indexes)
+                ui->tableDoublonsD->showRow(i.row());
+            cout<<"ultime ok"<<endl;
+        }*/
+        cout <<"prem s'est bien passé"<<endl;
+    }
+    cout << "avant test scan running" << endl;
+    //j'ai tenté cette méthode avec des switch : tonne de problemes avec les déclarations
+    //de variable dans les if, finalement pas plus simple que des if imbriqués
 	if (!scan->isRunning()){
         cout<<"scan not running" <<endl;
-		Sql* mabase=Sql::getInstance();
-        QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->MD5);
-        ui->tableDoublonsFicS->setModel(reponse);
-	}
+        Sql* mabase=Sql::getInstance();
+        if(ui->tabWidget->currentIndex() == 0){
+            QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->MD5);
+            ui->tableDoublonsFicS->setModel(reponse);
+        }
+        else if(ui->tabWidget->currentIndex() == 1){
+            QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->filenametrime);
+            ui->tableDoublonsFicP->setModel(reponse);
+        }
+        else if(ui->tabWidget->currentIndex() == 2){
+            QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->dossier);
+            ui->tableDoublonsD->setModel(reponse);
+        }
+    }
     prem = false;
     cout<<"fin rafraichir"<<endl;
 }
 
 void MainWindow::on_Buttonsupprimer_clicked()
 {
-		cout<<"debut"<<endl;
-		//todo : gérer suppression (multiple)
+    cout<<"debut"<<endl;
 		try {
-            QItemSelectionModel * lignes = ui->tableDoublonsFicS->selectionModel();
-			QModelIndexList indexes = lignes->selectedIndexes();
+            QItemSelectionModel *lignes;
+            if(ui->tabWidget->currentIndex() == 0)//case : 1st tab
+                lignes = ui->tableDoublonsFicS->selectionModel();
+            else lignes = ui->tableDoublonsFicP->selectionModel();//case 2nd tab
+            QModelIndexList indexes = lignes->selectedIndexes();
 			for(QModelIndex i :indexes){
 				QString s = i.data(0).toString();
 				cout<<"s=" << s.toStdString()<< endl;
-				cout<<"tour"<<endl;
 				QFile file(s);
 				if(file.exists()){
 					Sql* mabase = Sql::getInstance();
@@ -262,15 +304,13 @@ void MainWindow::on_Buttonsupprimer_clicked()
 						cout << s.toStdString() << " a été supprimé du disque." << endl;
 					}
 				}
-				else {
-					cout << s.toStdString() << " file doesn't exist, we do nothing." << endl;
-				}
-			}
-		//à la fin des suppressions, on rafraichit
-			on_Buttonrafraichir_clicked();
-		}
+                else cout << s.toStdString() << " file doesn't exist, we do nothing." << endl;
+            }
+        }
 		catch (...){
 		}
+    //à la fin des suppressions, on rafraichit
+    on_Buttonrafraichir_clicked();
 }
 
 void MainWindow::on_Buttonmasquer_clicked()

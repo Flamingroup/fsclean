@@ -23,6 +23,7 @@ public:
 public slots:
 	void setProgress();
     void FinScan();
+    void bloquerSuppr(int index);
 private slots:
     void setLEDGreen();
     void setLEDRed();
