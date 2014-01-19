@@ -236,7 +236,7 @@ void MainWindow::on_Buttonrafraichir_clicked()
 	if (!scan->isRunning()){
         cout<<"scan not running" <<endl;
 		Sql* mabase=Sql::getInstance();
-        QSqlQueryModel *reponse = mabase->sqlSelectDoublonsMD5();
+        QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->MD5);
         ui->tableDoublonsFicS->setModel(reponse);
 	}
     prem = false;
@@ -274,11 +274,26 @@ void MainWindow::on_Buttonsupprimer_clicked()
 }
 
 void MainWindow::on_Buttonmasquer_clicked()
-{
-    QItemSelectionModel * lignes = ui->tableDoublonsFicS->selectionModel();
-    QModelIndexList indexes = lignes->selectedIndexes();
-    for(QModelIndex i :indexes)
-        ui->tableDoublonsFicS->hideRow(i.row());
+{   //tab 0 : doublons fichiers, 1 : doublons fichiers potentiels, 2 : doublons dossiers
+    int numTab = ui->tabWidget->currentIndex();
+    if(numTab == 0){
+        QItemSelectionModel * lignes = ui->tableDoublonsFicS->selectionModel();
+        QModelIndexList indexes = lignes->selectedIndexes();
+        for(QModelIndex i :indexes)
+            ui->tableDoublonsFicS->hideRow(i.row());
+    }
+    else  if(numTab == 1){
+        QItemSelectionModel * lignes = ui->tableDoublonsFicP->selectionModel();
+        QModelIndexList indexes = lignes->selectedIndexes();
+        for(QModelIndex i :indexes)
+            ui->tableDoublonsFicP->hideRow(i.row());
+    }
+    else if(numTab == 2){
+        QItemSelectionModel * lignes = ui->tableDoublonsD->selectionModel();
+        QModelIndexList indexes = lignes->selectedIndexes();
+        for(QModelIndex i :indexes)
+            ui->tableDoublonsD->hideRow(i.row());
+    }
 }
 
 void MainWindow::on_quitButton_clicked()

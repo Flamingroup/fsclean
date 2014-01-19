@@ -140,7 +140,7 @@ char Sql::sqlInsertDossier(const string& str){
 	}
 	QSqlQuery query(db);
 	query.prepare("SELECT * FROM Dossiers WHERE chemin = :chemin");
-	query.bindValue(":chemin", QString(str.c_str());
+    query.bindValue(":chemin", QString(str.c_str()));
 	mutex.lock();
 	if (!query.exec()) {
 		cerr << "Error occurred SELECTing Dossiers." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
@@ -407,27 +407,28 @@ bool Sql::sqlSetDossierDoublons(){
 	return true;
 }
 
-QSqlQueryModel* Sql::sqlSelectDoublons(string selectDoublon){
-	cout << "sql::sqlSelectDoublonsMD5" << endl;
-	QSqlQueryModel* model = new QSqlQueryModel();
-	if (!db.open()) {
-		cerr << "Error occurred opening the database." << endl;
-		return 0;
-	}
-	QSqlQuery query(db);
-	query.prepare(QString(selectDoublon));
-	mutex.lock();
-	if (!query.exec()) {
-		cerr << "Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
-		mutex.unlock();
-		return 0;
-	}
-	model->setQuery(query);
-	while (model->canFetchMore()){
-		model->fetchMore();
-	}
-	mutex.unlock();
-	db.close();
-	//cout << "noerror" << endl;
-	return model;
+
+QSqlQueryModel* Sql::sqlSelectDoublons(string select){
+    cout << "sql::sqlSelectDoublonsMD5" << endl;
+    QSqlQueryModel* model = new QSqlQueryModel();
+    if (!db.open()) {
+        cerr << "Error occurred opening the database." << endl;
+        return 0;
+    }
+    QSqlQuery query(db);
+    query.prepare(QString(select.c_str()));
+    mutex.lock();
+    if (!query.exec()) {
+        cerr << "Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+        mutex.unlock();
+        return 0;
+    }
+    model->setQuery(query);
+    while (model->canFetchMore()){
+        model->fetchMore();
+    }
+    mutex.unlock();
+    db.close();
+    //cout << "noerror" << endl;
+    return model;
 }

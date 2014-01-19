@@ -227,7 +227,7 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
     }
 	list<path*> directories;
 	directories.push_back(new path(*thePair.second));
-	Fichier f;
+    Fichier f;
 	while(!directories.empty()){
 		try{
 			if(exists(*directories.front())){
@@ -245,6 +245,11 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
 					}
 					else if(is_directory(*it) && !isInBlacklist(it->path()) && !isHidden(it->path())) {
 						directories.push_back(new path(it->path()));
+                        if (!countOnly){
+                            mabase->sqlInsertDossier(it->path().string());
+                        }
+                        ++nbApprox;
+                        AVANCE = (nbApprox / denom) * 100;
 					}
 				}
 			}
