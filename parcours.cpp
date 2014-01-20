@@ -218,6 +218,7 @@ void Parcours::runAll() {
 	}
 	mabase->sqlDelDeletedFiles();
 	mabase->sqlCreateMD5();
+    mabase->sqlSetDossierDoublons();
 	regenerateFicCfg();
 }
 
@@ -228,7 +229,10 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
         mabase=Sql::getInstance();
     }
 	list<path*> directories;
-	directories.push_back(new path(*thePair.second));
+    directories.push_back(new path(*thePair.second));
+    if (!countOnly){
+        mabase->sqlInsertDossier(thePair.second->string());
+    }
     Fichier f;
 	while(!directories.empty()){
 		try{

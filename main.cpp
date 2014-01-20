@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
     MainWindow fenetre;
     fenetre.show();
     return app.exec();
+
     //Parcours* parc=Parcours::getInstance();
     //parc->runAll();
 }

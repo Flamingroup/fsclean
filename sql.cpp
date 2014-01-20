@@ -1,6 +1,7 @@
 #include "sql.h"
 #include <QVariant>
 #include <QString>
+#include <QMap>
 #include <QSqlError>
 #include <string.h>
 #include <stdio.h>
@@ -14,7 +15,7 @@
 
 Sql* Sql::_instance=NULL;
 
-Sql::Sql(path* p) {   
+Sql::Sql(path* p) {
 	cout << "sqlCreate" << endl;
 	if (exists(p->string())){
 		db = QSqlDatabase::addDatabase("QSQLITE");
@@ -45,7 +46,7 @@ Sql::Sql(path* p) {
 		mutex.unlock();
 		throw 3;
 	}
-	query.prepare("CREATE TABLE IF NOT EXISTS Dossiers (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, chemin TEXT UNIQUE, stillexist INTEGER, isdoublon INTEGER)");
+    query.prepare("CREATE TABLE IF NOT EXISTS Dossiers (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, chemin TEXT UNIQUE, stillexist INTEGER, isdoublon INTEGER, nbfic INTEGER)");
 	if (!query.exec()) {
 		cerr << "Error occurred creating table." << endl;
 		db.close();
@@ -262,7 +263,6 @@ void Sql::Affiche(){
 	db.close();
 }
 
-
 bool Sql::sqlSetMd5(Fichier& f) {
 
     cout << "sqlSetMd5" << endl;
@@ -348,63 +348,99 @@ bool Sql::sqlCreateMD5(){
 }
 
 bool Sql::isDossierDoublon(const string& chemin){
-	QSqlQuery query(db);
-	query.prepare(QString("SELECT COUNT(*), FROM Fichiers WHERE chemin LIKE :chemin% and MD5 IS NULL))"));
-	query.bindValue(":chemin", QString(chemin.c_str()));
-	mutex.lock();
-	if (!query.exec()) {
-		cerr << "Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
-		mutex.unlock();
-		return 0;
-	}
-	if (query.value(0).toInt() == 0){
-		mutex.unlock();
-		db.close();
-		return false;
-	}
-	else {
-		mutex.unlock();
-		db.close();
-		return true;
-	}
+    if (!db.open()) {
+        cerr << "Error occurred opening the database." << endl;
+        return false;
+    }
+    string concatene=chemin;
+    concatene+='%';
+    QSqlQuery query(db);
+    query.prepare(QString("SELECT COUNT(*) FROM Fichiers WHERE chemin LIKE :chemin and MD5 IS NULL"));
+    query.bindValue(":chemin", QString(concatene.c_str()));
+    mutex.lock();
+    if (!query.exec()) {
+        cerr << "Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+        mutex.unlock();
+        return false;
+    }
+    if (query.next()) {
+        if (query.value(0).toInt() == 0){
+            query.prepare(QString("SELECT COUNT(*) FROM Fichiers WHERE chemin LIKE :chemin"));
+            query.bindValue(":chemin", QString(concatene.c_str()));
+            if (!query.exec()) {
+                cerr << "Error occurred while selecting doublons MD5 bis. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+                mutex.unlock();
+                return false;
+            }
+            if (query.next()){
+                query.prepare(QString("UPDATE Dossiers SET nbfic = :toset WHERE chemin = :chemin"));
+                query.bindValue(":toset", query.value(0));
+                query.bindValue(":chemin", QString(chemin.c_str()));
+                if (!query.exec()) {
+                    cerr << "Error occurred while updating nbfic MD5 bis. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+                    mutex.unlock();
+                    return false;
+                }
+            }
+            mutex.unlock();
+            db.close();
+            return true;
+        }
+        else {
+            mutex.unlock();
+            db.close();
+            return false;
+        }
+    }
+    return false;
 }
 
 bool Sql::sqlSetDossierDoublons(){
-	cout << "sql::sqlSetDossierDoublons" << endl;
-	list<string> ls;
-	if (!db.open()) {
-		cerr << "Error occurred opening the database." << endl;
-		return 0;
-	}
-	QSqlQuery query(db);
-	query.prepare(QString("SELECT chemin, FROM Dossiers"));
-	mutex.lock();
-	if (!query.exec()) {
-		cerr << "Error occurred while setting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
-		mutex.unlock();
-		return 0;
-	}
-	while (query.next()) {
-		ls.push_back(query.value(0).toString().toStdString());
-	}
-	mutex.unlock();
-	list<string>::iterator it = ls.begin();
-	list<string>::iterator fin = ls.end();
-	while (it != fin) {
-		if (isDossierDoublon(*it)){
-			query.prepare(QString("UPDATE Dossiers SET isdoublon = 1 WHERE chemin = :chemin"));
-			query.bindValue(":chemin", QString((*it).c_str()));
-			mutex.lock();
-			if (!query.exec()) {
-				cerr << "Error occurred while Updating flag doublons dossier. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
-			}
-			mutex.unlock();
-		}
-		it = ls.erase(it);
-	}
-	db.close();
-	//cout << "noerror" << endl;
-	return true;
+    cout << "sql::sqlSetDossierDoublons" << endl;
+    list<string> ls;
+    if (!db.open()) {
+        cerr << "Error occurred opening the database." << endl;
+        return 0;
+    }
+    QSqlQuery query(db);
+    query.prepare(QString("SELECT chemin FROM Dossiers"));
+    mutex.lock();
+    if (!query.exec()) {
+        cerr << "Error occurred while setting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+        mutex.unlock();
+        return 0;
+    }
+    while (query.next()) {
+        ls.push_back(query.value(0).toString().toStdString());
+    }
+    db.close();
+    mutex.unlock();
+    list<string>::iterator it = ls.begin();
+    list<string>::iterator fin = ls.end();
+    while (it != fin) {
+        if (isDossierDoublon(*it)){
+            if (!db.open()) {
+                cerr << "Error occurred opening the database." << endl;
+                return 0;
+            }
+            QSqlQuery query2(db);
+            query2.prepare(QString("UPDATE Dossiers SET isdoublon = 1 WHERE chemin = :chemin"));
+            query2.bindValue(":chemin", QString((*it).c_str()));
+            mutex.lock();
+            if (!query2.exec()) {
+                cerr << "Error occurred while Updating flag doublons dossier. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+            }
+            db.close();
+            mutex.unlock();
+            ++it;
+        }
+        else {
+            it = ls.erase(it);
+        }
+    }
+    db.close();
+    //cout << "noerror" << endl;
+    return true;
 }
 
 
