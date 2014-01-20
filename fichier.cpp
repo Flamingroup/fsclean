@@ -127,7 +127,7 @@ void Fichier::calcMD5() {
 		}
         config.close();
 	}
-	else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
+    else cerr << "Erreur ouverture fichier " << chemin << "." << endl;
 	stringstream test;
 	unsigned char out[16];
     /* get the hash in out[0..15] */

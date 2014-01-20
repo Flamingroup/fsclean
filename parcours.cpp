@@ -7,19 +7,20 @@
 
 int Parcours::AVANCE = 0;
 Parcours* Parcours::_instance=NULL;
+
 enum State{waitWL=0, scanWL=1,scanBL=2, getNbDBfic=3,errorStatus=4};
+// 0 : on attends de trouver liste blanche
+// 1 : on insère dans liste blanche
+// 2 : on insère dans liste noire
+// 3 : on recupere le nombre de fichiers
+// 4 : on verifie si erreur lors de la derniere fermeture
+
 Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
-    cout<<"Parcours::Parcours()"<<endl;
+    cout<<"Création Parcours..."<<endl;
     ifstream config(chemin.c_str(), ios_base::in);
     if (config) {
 		string ligne;
-        char etat=0;
-        // 0 : on attends de trouver liste blanche
-        // 1 : on insère dans liste blanche
-        // 2 : on insère dans liste noire
-        // 3 : on recupere le nombre de fichiers
-        // 4 : on verifie si erreur lors de la derniere fermeture
-        //cout<<"debut while : "<<endl;
+        char etat=waitWL;
 		while (getline(config, ligne)) {
 			if (ligne[0] == '#')
 				continue;
@@ -34,7 +35,7 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 				continue;
 			}
             if (etat == scanWL && ligne != "listenoire") {
-				cout<<"listeBlanche mise à jour"<<endl;
+                cout<<"    ListeBlanche mise à jour"<<endl;
 				addToWL(ligne);
 				continue;
 			}
@@ -43,7 +44,7 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
 				continue;
 			}
             if (etat == scanBL && ligne != "nombreapprox") {
-                cout<<"listeNoire mise à jour"<<endl;
+                cout<<"    ListeNoire mise à jour"<<endl;
                 addToBL(ligne);
 				continue;
 			}
@@ -71,20 +72,24 @@ Parcours::Parcours(string chemin):cheminFicCfg(chemin) {
             if(etat == errorStatus){
                 QString s = QString::fromStdString(ligne);
                 if(s.toDouble()){
-                    cout << "dernier scan interrompu" << endl;
+                    cout << "    Dernier scan interrompu" << endl;
                     countApprox();
                 }
             }
 
-		}
-        //cout<<"fin while"<<endl;
+        }
 		config.close();
 	}
-	else cout << "Erreur ouverture fichier config (" << chemin << ")." << endl;
-	denom=nbApprox;
+    else {
+        cerr << "    Erreur ouverture fichier config (" << chemin << ")." << endl;
+        resetFicCfg();
+        Parcours::getInstance(chemin);
+        return;
+    }
+    denom=nbApprox;
     AVANCE=(denom/nbApprox)*100;
 	regenerateFicCfg();
-	cout<<"fin Parcours::Parcours() " << nbApprox << endl;
+    cout<<"    Parcours construit." << endl;
 }
 
 Parcours* Parcours::getInstance(string chemin) {
@@ -99,7 +104,7 @@ Parcours* Parcours::getInstance(string chemin) {
 	return _instance;
 }
 void Parcours::countApprox() {
-    cout << "Parcours::CountApprox" << endl;
+    cout << "Calcul nombre de fichiers à scanner..." << endl;
     nbApprox=0;
 	map<string, path*>::iterator it=listeblanche.begin();
 	map<string, path*>::iterator end=listeblanche.end();
@@ -107,6 +112,7 @@ void Parcours::countApprox() {
 		runFromPath(*it, true);
 	}
     AVANCE=100;
+    cout << "    " << nbApprox << " fichiers trouvés." <<endl;
 }
 
 path* Parcours::stringToPath(string toTransform, bool verifExist) {
@@ -119,11 +125,11 @@ path* Parcours::stringToPath(string toTransform, bool verifExist) {
 			toTransform.erase(toTransform.begin());
 			toTransform=secure_getenv("HOME")+toTransform;
 		}
-        cout << "dans ~ : *" << toTransform << "*";
+        //cout << "dans ~ : *" << toTransform << "*";
 	}
 	else if (toTransform[0] != '/'){
 		toTransform=boost::filesystem::initial_path().string()+'/'+toTransform;
-		cout << "dans / : *" << toTransform << "*";
+        //cout << "dans / : *" << toTransform << "*";
 	}
 	if (verifExist && !exists(toTransform))
 		return 0;
@@ -133,51 +139,47 @@ path* Parcours::stringToPath(string toTransform, bool verifExist) {
 }
 
 void Parcours::voirWL() {
-    cout<<"contenu Wlist : "<<endl;
+    cout<<"Contenu liste blanche : "<<endl;
     map<string, path*>::iterator it = listeblanche.begin();
     map<string, path*>::iterator fin = listeblanche.end();
     for(;it!=fin;it++){
-        cout<<"string="<<(*it).first<<endl<<"path="<<((*it).second)->string()<<endl;
+        cout<< "    " <<(*it).first<<endl;
     }
 }
 
 void Parcours::voirBL() {
-    cout<<"contenu Blist : "<<endl;
+    cout<<"Contenu liste noire : "<<endl;
     map<string, path*>::iterator it = listenoire.begin();
     map<string, path*>::iterator fin = listenoire.end();
     for(;it!=fin;it++){
-        cout<<"string="<<(*it).first<<endl<<"path="<<((*it).second)->string()<<endl;
+        cout<<"    "<<(*it).first<<endl;
     }
 }
 
 void Parcours::addToWL(string chemin) {
     path *tmp = stringToPath(chemin);
 	if (tmp == NULL) return;
-    cout << "addToWL : path tmp=" << tmp->string() <<endl;
-	if (listeblanche.find(tmp->string()) == listeblanche.end()) {
+    cout << "    Ajout liste blanche : " << tmp->string() <<endl;
+    if (listeblanche.find(tmp->string()) == listeblanche.end())
 		listeblanche[tmp->string()]=tmp;
-        cout<<"ajout fait"<<endl;
-    }
-    else cout<<"deja dans WL"<<endl;
+    else cout << "    " << tmp->string() << " déjà en liste blanche."<<endl;
 }
 
 void Parcours::addToBL(string chemin) {
     path *tmp = stringToPath(chemin);
 	if (tmp == NULL) return;
-    cout << "addToBL : path tmp=" << tmp->string() <<endl;
-	if (listenoire.find(tmp->string()) == listenoire.end()) {
-		listenoire[tmp->string()]=tmp;
-        cout<<"ajout fait"<<endl;
-    }
-    else cout<<"deja dans BL"<<endl;
+    cout << "    Ajout liste noire : " << tmp->string() <<endl;
+    if (listenoire.find(tmp->string()) == listenoire.end())
+        listenoire[tmp->string()]=tmp;
+    else cout << "    " << tmp->string() << " déjà en liste noire." <<endl;
 }
 
 void Parcours::rmvFromWL(string chemin) {
-    cout<<"rmvFromWL : "<<chemin<<endl;
 	path *tmp = stringToPath(chemin);
 	if (tmp == NULL) return;
 	map<string, path*>::iterator it=listeblanche.find(tmp->string());
 	if (it != listeblanche.end()){
+        cout << tmp->string() << " oté de la liste blanche." << endl;
 		delete (it->second);
 		listeblanche.erase(it);
     }
@@ -185,45 +187,38 @@ void Parcours::rmvFromWL(string chemin) {
 }
 
 void Parcours::rmvFromBL(string chemin) {
-    cout<<"rmvFromBL : "<<chemin<<endl;
 	path *tmp = stringToPath(chemin);
 	if (tmp == NULL) return;
 	map<string, path*>::iterator it=listenoire.find(tmp->string());
 	if (it != listenoire.end()){
+        cout << tmp->string() << " oté de la liste noire." << endl;
 		delete (it->second);
 		listenoire.erase(it);
 	}
 }
 
 void Parcours::runAll() {
-	/* On execute le parcours résursif
-	 * Si un résultat est un fichier :
-	 *		on remplis les attributs d'un fichier
-	 *		on insère le fichier7
-     * Sinon, c'est un dossier
-	 *		on l'ajouet à la pile si il est pas dans la liste noire
-	 * On recommence jusqu'a pile vide
-	 *
-	 */
 	nbApprox=0;
 	AVANCE = (nbApprox/denom)*100;
-	cout << "Parcours::runAll()" << endl;
 	Sql* mabase=Sql::getInstance();
-	mabase->sqlRaz();
+    mabase->sqlRaz();
 	map<string, path*>::iterator it=listeblanche.begin();
 	map<string, path*>::iterator end=listeblanche.end();
 	for(; it!=end; ++it){
-		cout<<"Parcours::runall() : "<<(*it).first<<endl<<" va etre inspecté"<<endl;
 		runFromPath(*it);
-	}
+    }
+    cout << "    Suppression des fichiers non existants..." << endl;
 	mabase->sqlDelDeletedFiles();
+    cout << "    Calcul des clés MD5..." << endl;
 	mabase->sqlCreateMD5();
+    cout << "    Recherche des dossiers doublons..." << endl;
     mabase->sqlSetDossierDoublons();
+    cout << "    Mise à jour de config.cfg" << endl;
 	regenerateFicCfg();
 }
 
 void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
-    cout<<"Parcours::runFromPath()"<<endl;
+    //cout<<"Parcours::runFromPath()"<<endl;
     Sql* mabase;
     if (!countOnly){
         mabase=Sql::getInstance();
@@ -295,6 +290,9 @@ void Parcours::resetFicCfg(int8_t error) {
 			   << "/proc" << endl
 			   << "/boot" << endl
 			   << "/etc" << endl
+               << "/tmp" << endl
+               << "/dev" << endl
+               << "/sys" << endl
 			   << "nombreapprox" << endl
                << "0" << endl
                << "error" << endl
@@ -306,7 +304,7 @@ void Parcours::resetFicCfg(int8_t error) {
 }
 
 void Parcours::regenerateFicCfg(int err) {
-	cout<<"Parcours::regenerateFicCfg()\n"<<endl;
+    cout<<"Régénération fichier config.cfg..."<<endl;
 	ofstream config(cheminFicCfg, ios_base::out);
 	if (config) {
 		map<string, path*>::iterator it = listeblanche.begin();
@@ -324,10 +322,10 @@ void Parcours::regenerateFicCfg(int err) {
         config << "nombreapprox" << endl << nbApprox << endl;
         config << "error" << endl << err << endl;
 		if(scannercaches){
-			cout << "scannercaches=1" << endl;
+            cout << "    Scan des fichiers cachés activés" << endl;
 		}
 		config.close();
 	}
-	else cout << "Erreur ouverture fichier config (" << cheminFicCfg << ")." << endl;
-	cout<<"fin Parcours::regenerateFicCfg()"<<endl;
+    else cout << "    Erreur ouverture fichier config (" << cheminFicCfg << ")." << endl;
+    cout<<"    config.cfg régénéré."<<endl;
 }

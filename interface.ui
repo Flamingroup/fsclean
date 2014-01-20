@@ -148,7 +148,7 @@
             </widget>
             <widget class="QWidget" name="DfichiersPotentiels">
              <attribute name="title">
-              <string>doublons potentiels</string>
+              <string>Doublons potentiels</string>
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_2">
               <item>

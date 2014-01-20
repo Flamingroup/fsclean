@@ -27,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(scan,SIGNAL(scanFinished()),this,SLOT(FinScan()));
     connect(ui->tabWidget,SIGNAL(currentChanged(int)),this,SLOT(bloquerSuppr(int)));
     timer->start(100);
-    cout<<"Initialisation GUI"<<endl;
 	remplirWL();
 	remplirBL();
 	displayNbElemBDDInStatusBar();
@@ -37,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableDoublonsFicS->resizeColumnsToContents();
     ui->tableDoublonsFicP->resizeColumnsToContents();
     ui->tableDoublonsD->resizeColumnsToContents();
-    cout<<"FIN Initialisation GUI\n"<<endl;
+    cout<<"GUI [ok]"<<endl;
 }
 
 MainWindow::~MainWindow()
@@ -51,22 +50,23 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_scanButton_clicked()
 {
-    //todo ici inserer thread
-    cout<<"lancement thread.."<<endl;
-	if (scan == NULL){
+    //cout<<"lancement thread.."<<endl;
+    if (scan == NULL)
 		scan=new Thread;
-	}//normalement else inutile
-	else {scan->quit(); cout<<"else"<<endl;}
-    setLEDRed();
-	scan->start();
-    if(scan->isRunning()){
+    if(!scan->isRunning()){
+        Parcours *p = Parcours::getInstance();
+        if(p->listeblanche.empty()){
+            p->addToWL("/");
+            QMessageBox::warning(this, "Avertissement", "La liste blanche est vide, la racine sera scannée.");
+        }
+        ui->plusBLButton->setDisabled(true);
+        ui->WLplusButton->setDisabled(true);
+        ui->lessBLButton->setDisabled(true);
+        ui->lessWLButton->setDisabled(true);
+        setLEDRed();
+        scan->start();
         displayInStatusBar("Scan en cours...");
     }
-    //ou mettre isFinished? il n'y a qu'un thread, comment reset son etat?
-	if (!scan->isRunning()){
-		delete scan;
-		scan=NULL;
-	}
 }
 
 void MainWindow::displayInStatusBar(const std::string & message) {
@@ -98,9 +98,15 @@ void MainWindow::setProgress()
 
 void MainWindow::FinScan()
 {
+    ui->plusBLButton->setDisabled(false);
+    ui->WLplusButton->setDisabled(false);
+    ui->lessBLButton->setDisabled(false);
+    ui->lessWLButton->setDisabled(false);
 	setLEDGreen();
 	displayNbElemBDDInStatusBar();
     on_Buttonrafraichir_clicked();
+    delete scan;
+    scan=NULL;
 }
 
 void MainWindow::bloquerSuppr(int index)
@@ -150,7 +156,7 @@ void MainWindow::on_lessWLButton_clicked()
     //pour modifier la config : si map modifiée, config effacée et nouvelle config vaut listeB+N
     if(ui->listwhiteList->count() && ui->listwhiteList->selectedItems().count()){
         QString s = ui->listwhiteList->currentItem()->text();
-		std::cout<<"lessWLButton enleve = "<<s.toStdString()<<endl;
+        cout<<"Oté de la liste blanche : "<<s.toStdString()<<endl;
 		Parcours *p=Parcours::getInstance();
 		p->rmvFromWL(s.toStdString());
 		p->regenerateFicCfg();
@@ -165,7 +171,7 @@ void MainWindow::on_lessBLButton_clicked()
     //pour modifier la config : si map modifiée, config effacée et nouvelle config vaut listeB+N
     if(ui->listblackList->count() && ui->listblackList->selectedItems().count()){
         QString s = ui->listblackList->currentItem()->text();
-		std::cout<<"lessWLButton enleve = "<<s.toStdString()<<endl;
+        cout<<"Ajouté à la liste blanche : "<<s.toStdString()<<endl;
 		Parcours *p=Parcours::getInstance();
 		p->rmvFromBL(s.toStdString());
 		p->regenerateFicCfg();
@@ -186,10 +192,6 @@ void MainWindow::on_actionReinitialiser_param_defaut_triggered()
 
 void MainWindow::on_WLplusButton_clicked()
 {
-    //todo : popup d'entrée d'un chemin, test du chemin et ajout
-    //si existe : ajout
-    //            regen config
-    //pe plus tard : test si scan en cours avant de modif config
     QString inclusion = QFileDialog::getExistingDirectory(this, "Ajouter au scan", "/", QFileDialog::ShowDirsOnly );
 	if(inclusion.length() > 0){
 		Parcours *p=Parcours::getInstance();
@@ -229,9 +231,9 @@ void MainWindow::on_actionA_propos_triggered()
 
 void MainWindow::on_Buttonrafraichir_clicked()
 {
-    cout << endl <<"rafraichir_button index tab vaut = "<<ui->tabWidget->currentIndex()<<endl;
+    cout << endl <<"Rafraichissement de l'onglet "<<ui->tabWidget->currentIndex()<< "..." <<endl;
     if (scan->isRunning()){
-        cout <<"rafraichissement impo, scan en cours"<<endl;
+        cout <<"    Vous ne pouvez rafraichir pendant un scan."<<endl;
 		return;
     }
 	static bool prem = true;
@@ -242,15 +244,17 @@ void MainWindow::on_Buttonrafraichir_clicked()
             QModelIndexList indexes = table->selectedIndexes();
             for(QModelIndex i :indexes)
                 ui->tableDoublonsFicS->showRow(i.row());
-        }
+        }/*
         else if(ui->tabWidget->currentIndex() == 1){//case 2nd tab
             ui->tableDoublonsFicP->selectAll();
 
             QItemSelectionModel * table = ui->tableDoublonsFicP->selectionModel();
+            cout<<"ok"<<endl;
             QModelIndexList indexes = table->selectedIndexes();
+            cout<<"okok"<<endl;
             for(QModelIndex i :indexes)
                 ui->tableDoublonsFicP->showRow(i.row());
-        }/*
+        }*//*
         else if(ui->tabWidget->currentIndex() == 2){//case 3rd tab
             cout << "ok ou pas?" << endl;
             ui->tableDoublonsD->selectAll();
@@ -260,34 +264,36 @@ void MainWindow::on_Buttonrafraichir_clicked()
                 ui->tableDoublonsD->showRow(i.row());
             cout<<"ultime ok"<<endl;
         }*/
-        cout <<"prem s'est bien passé"<<endl;
+        cout <<"    Objets cachés révélés"<<endl;
     }
-    cout << "avant test scan running" << endl;
     //j'ai tenté cette méthode avec des switch : tonne de problemes avec les déclarations
     //de variable dans les if, finalement pas plus simple que des if imbriqués
-	if (!scan->isRunning()){
-        cout<<"scan not running" <<endl;
-        Sql* mabase=Sql::getInstance();
-        if(ui->tabWidget->currentIndex() == 0){
-            QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->MD5);
-            ui->tableDoublonsFicS->setModel(reponse);
-        }
-        else if(ui->tabWidget->currentIndex() == 1){
-            QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->filenametrime);
-            ui->tableDoublonsFicP->setModel(reponse);
-        }
-        else if(ui->tabWidget->currentIndex() == 2){
-            QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->dossier);
-            ui->tableDoublonsD->setModel(reponse);
-        }
+    //if (!scan->isRunning()){
+    cout<<"scan not running" <<endl;
+    Sql* mabase=Sql::getInstance();
+    if(ui->tabWidget->currentIndex() == 0){//onglet 0 fichiers surs
+        QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->MD5);
+        ui->tableDoublonsFicS->setModel(reponse);
+        ui->tableDoublonsFicS->resizeColumnsToContents();
     }
+    else if(ui->tabWidget->currentIndex() == 1){//onglet 1 fichiers potentiels
+        QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->filenametrime);
+        ui->tableDoublonsFicP->setModel(reponse);
+        ui->tableDoublonsFicP->resizeColumnsToContents();
+    }
+    else if(ui->tabWidget->currentIndex() == 2){//onglet 2 dossiers potentiels
+        QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->dossier);
+        ui->tableDoublonsD->setModel(reponse);
+        ui->tableDoublonsD->resizeColumnsToContents();
+    }
+    //}if inutile, on a déjà fait un return dans le cas contraire.
     prem = false;
-    cout<<"fin rafraichir"<<endl;
+    cout<<"    Rafraichissement terminé."<<endl;
 }
 
 void MainWindow::on_Buttonsupprimer_clicked()
 {
-    cout<<"debut"<<endl;
+    cout<<"Suppression en cours..."<<endl;
 		try {
             QItemSelectionModel *lignes;
             if(ui->tabWidget->currentIndex() == 0)//case : 1st tab
@@ -302,15 +308,16 @@ void MainWindow::on_Buttonsupprimer_clicked()
 					Sql* mabase = Sql::getInstance();
 					mabase->sqlDelete(s.toStdString());
 					if(file.remove()){
-						cout << s.toStdString() << " a été supprimé du disque." << endl;
+                        cout <<"    " << s.toStdString() << " a été supprimé du disque." << endl;
 					}
 				}
-                else cout << s.toStdString() << " file doesn't exist, we do nothing." << endl;
+                else cout << "    " << s.toStdString() << " Ce fichier n'existe pas." << endl;
             }
         }
 		catch (...){
 		}
     //à la fin des suppressions, on rafraichit
+    cout << "    Fin supression." << endl;
     on_Buttonrafraichir_clicked();
 }
 
@@ -344,5 +351,7 @@ void MainWindow::on_quitButton_clicked()
         Parcours *p  = Parcours::getInstance();
         p->countApprox();
         p->regenerateFicCfg();
+        delete scan;
+        scan = NULL;
     }
 }
