@@ -64,7 +64,7 @@ public:
          * @brief Affiche la base de donnée toute entière
          * @return false en cas d'erreur avec la bdd
          */
-        bool Affiche();
+        bool Affiche(string commande);
         /**
          * @brief sqlCreateMD5 : Sélectionne les fichiers dont le poids apparait plus d'une fois en BDD
          *                       Et appel sqlSetMd5() pour mettre les md5 dans la base de donnée
