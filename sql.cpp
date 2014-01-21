@@ -13,7 +13,6 @@
 #include <sstream>
 #include <unistd.h>
 
-
 Sql* Sql::_instance=NULL;
 
 Sql::Sql(string cheminBdd) {
@@ -75,11 +74,11 @@ Sql* Sql::getInstance() {
 	return _instance;
 }
 
-char Sql::sqlInsert(const Fichier& f){
+bool Sql::sqlInsert(const Fichier& f){
     //cout << "sqlInsert" << endl;
 	if (!db.open()) {
         cerr << "    Error occurred opening the database." << endl;
-		return -1;
+        return false;
 	}
 	QSqlQuery query(db);
 	query.prepare("SELECT * FROM Fichiers WHERE chemin = :chemin");
@@ -88,7 +87,7 @@ char Sql::sqlInsert(const Fichier& f){
 	if (!query.exec()) {
         cerr << "    Error occurred SELECT." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
-		return -1;
+        return false;
 	}
 	if (query.next()) {
 		if (f.getDateModif() != (quint32)query.value(4).toULongLong() || f.getPoids() != (quint64)query.value(3).toULongLong()) {
@@ -99,7 +98,7 @@ char Sql::sqlInsert(const Fichier& f){
 			if (!query2.exec()) {
                 cerr << "    Error occurred deleting." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 				mutex.unlock();
-				return -1;
+                return false;
 			}
 		}
 		else {
@@ -109,13 +108,13 @@ char Sql::sqlInsert(const Fichier& f){
 			if (!query2.exec()) {
                 cerr << "    Error occurred while Updating the flag." << query2.lastError().driverText().toStdString() << " " << query2.lastQuery().toStdString() << endl;
 				mutex.unlock();
-				return -1;
+                return false;
 			}
 			//cout << "Rien à faire, fichier déjà dans la base" << endl;
 			db.close();
             //cout << "noerror" << endl;
 			mutex.unlock();
-			return 0;
+            return true;
 		}
 	}
 	mutex.unlock();
@@ -128,20 +127,20 @@ char Sql::sqlInsert(const Fichier& f){
 	if (!query.exec()) {
         cerr << "    Error occurred inserting." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
-		return -1;
+        return false;
 	}
 	mutex.unlock();
 	db.close();
 	//cout << "Fichier inséré ou MAJ sans erreurs" << endl;
     //cout << "noerror" << endl;
-	return 0;
+    return true;
 }
 
-char Sql::sqlInsertDossier(const string& str){
+bool Sql::sqlInsertDossier(const string& str){
     //cout << "sqlInsertDossier de "<< str << endl;
 	if (!db.open()) {
 		cerr << "Error occurred opening the database." << endl;
-		return -1;
+        return false;
 	}
 	QSqlQuery query(db);
 	query.prepare("SELECT * FROM Dossiers WHERE chemin = :chemin");
@@ -150,7 +149,7 @@ char Sql::sqlInsertDossier(const string& str){
 	if (!query.exec()) {
 		cerr << "Error occurred SELECTing Dossiers." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
-		return -1;
+        return false;
 	}
 	if (query.next()) {
 		QSqlQuery query2(db);
@@ -159,13 +158,13 @@ char Sql::sqlInsertDossier(const string& str){
 		if (!query2.exec()) {
 			cerr << "Error occurred while Updating the flag of dossiers." << query2.lastError().driverText().toStdString() << " " << query2.lastQuery().toStdString() << endl;
 			mutex.unlock();
-			return -1;
+            return false;
 		}
 		//cout << "Rien à faire, fichier déjà dans la base" << endl;
 		db.close();
         //cout << "noerror" << endl;
 		mutex.unlock();
-		return 0;
+        return true;
 	}
 	mutex.unlock();
 	query.prepare("INSERT INTO Dossiers (chemin, stillexist, isdoublon) VALUES (:chemin, 1, 0)");
@@ -174,20 +173,20 @@ char Sql::sqlInsertDossier(const string& str){
 	if (!query.exec()) {
 		cerr << "Error occurred inserting in dossiers." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
-		return -1;
+        return false;
 	}
 	mutex.unlock();
 	db.close();
 	//cout << "Dossier inséré sans erreur" << endl;
     //cout << "noerror" << endl;
-	return 0;
+    return true;
 }
 
-void Sql::sqlDelDeletedFiles() {
+bool Sql::sqlDelDeletedFiles() {
     //cout << "sqlDelDeletedFiles" << endl;
 	if (!db.open()) {
         cerr << "    Error occurred opening the database." << endl;
-		return;
+        return false;
 	}
 	QSqlQuery query(db);
 	query.prepare("DELETE FROM Fichiers WHERE stillexist = 0");
@@ -195,24 +194,25 @@ void Sql::sqlDelDeletedFiles() {
 	if (!query.exec()) {
         cerr << "    Error occurred deleting deleted files." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
-		return;
+        return false;
 	}
 	query.prepare("DELETE FROM Dossiers WHERE stillexist = 0");
 	if (!query.exec()) {
         cerr << "    Error occurred deleting deleted files." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
-		return;
+        return false;
 	}
     mutex.unlock();
 	db.close();
+    return true;
     //cout << "noerror" << endl;
 }
 
-void Sql::sqlRaz() {
+bool Sql::sqlRaz() {
     //cout << "sqlRAZ" << endl;
 	if (!db.open()) {
         cerr << "    Error occurred opening the database." << endl;
-		return;
+        return false;
 	}
 	QSqlQuery query(db);
 	query.prepare("UPDATE Fichiers SET stillexist = 0");
@@ -220,32 +220,32 @@ void Sql::sqlRaz() {
     if (!query.exec()) {
         cerr << "    Error occurred while RAZing the flag." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
-		return;
+        return false;
 	}
 	query.prepare("UPDATE Dossiers SET stillexist = 0, isdoublon = 0");
 	if (!query.exec()) {
         cerr << "    Error occurred while RAZing the flag." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
-		return;
+        return false;
 	}
     mutex.unlock();
 	db.close();
+    return true;
     //cout << "noerror" << endl;
 }
 
-void Sql::Affiche(){
-
+bool Sql::Affiche(){
 	cout << "=== SQL AFFICHE ===" << endl;
 	if (!db.open()) {
         cerr << "    Error occurred opening the database." << endl;
-		return;
+        return false;
 	}
 	QSqlQuery qry(db);
     mutex.lock();
     if (!qry.exec(MD5.c_str())) {
         cerr << "    Error occurred Affiching the database." << qry.lastError().driverText().toStdString() << " " << qry.lastQuery().toStdString() << endl;
 		mutex.unlock();
-		return;
+        return false;
 	}
 	while (qry.next()) {
 		QString a = qry.value(0).toString();
@@ -265,6 +265,7 @@ void Sql::Affiche(){
 	}
     mutex.unlock();
 	db.close();
+    return true;
 }
 
 bool Sql::sqlSetMd5(Fichier& f) {

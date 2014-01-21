@@ -43,7 +43,8 @@ class Fichier
          */
 		Fichier();
         /**
-         * @brief Fichier : Constructeur de Fichier à partir d'une qsqlquery, suite à une sélection dans la base de donnée
+         * @brief Fichier : Constructeur de Fichier à partir d'une qsqlquery,
+         *                  suite à une sélection dans la base de donnée et créé le md5 du fichier
          */
 		Fichier(QSqlQuery&);
 
