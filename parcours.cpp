@@ -5,7 +5,7 @@
 #include <string>
 #include <fstream>
 
-int Parcours::AVANCE = 0;
+char Parcours::AVANCE = 0;
 Parcours* Parcours::_instance=NULL;
 
 enum State{waitWL=0, scanWL=1,scanBL=2, getNbDBfic=3,errorStatus=4};
@@ -242,7 +242,7 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
 								mabase->sqlInsert(f);
 						}
                         ++nbApprox;
-						AVANCE =(nbApprox/denom)*100;
+                        AVANCE =(nbApprox / denom)*100;
 					}
 					else if(is_directory(*it) && !isInBlacklist(it->path()) && !isHidden(it->path())) {
 						directories.push_back(new path(it->path()));
@@ -287,7 +287,7 @@ void Parcours::resetFicCfg(int8_t error) {
 			   << "/home" << endl
 			   << "/media" << endl
 			   << "listenoire" << endl
-			   << "/proc" << endl
+               << "/proc" << endl
 			   << "/boot" << endl
 			   << "/etc" << endl
                << "/tmp" << endl
@@ -297,7 +297,17 @@ void Parcours::resetFicCfg(int8_t error) {
                << "0" << endl
                << "error" << endl
                << error <<endl;
-		config.close();
+        config.close();
+        listeblanche.clear();
+        listenoire.clear();
+        addToWL("/home");
+        addToWL("/media");
+        addToBL("/proc");
+        addToBL("/boot");
+        addToBL("/etc");
+        addToBL("/tmp");
+        addToBL("/dev");
+        addToBL("/sys");
 	}
 	else cout << "Erreur ouverture fichier config (" << "./config.cfg" << ")." << endl;
 	cout<<"fin Parcours::Parcours()"<<endl;
