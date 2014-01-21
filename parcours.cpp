@@ -6,6 +6,7 @@
 #include <fstream>
 
 char Parcours::AVANCE = 0;
+bool Parcours::STOP = false;
 Parcours* Parcours::_instance=NULL;
 
 enum State{waitWL=0, scanWL=1,scanBL=2, getNbDBfic=3,errorStatus=4};
@@ -205,16 +206,19 @@ void Parcours::runAll() {
 	map<string, path*>::iterator it=listeblanche.begin();
 	map<string, path*>::iterator end=listeblanche.end();
 	for(; it!=end; ++it){
-		runFromPath(*it);
+        if(!STOP)
+            runFromPath(*it);
     }
     cout << "    Suppression des fichiers non existants..." << endl;
-	mabase->sqlDelDeletedFiles();
-    cout << "    Calcul des clés MD5..." << endl;
-	mabase->sqlCreateMD5();
+    mabase->sqlDelDeletedFiles();
+    if(!STOP){
+        cout << "    Calcul des clés MD5..." << endl;
+        mabase->sqlCreateMD5();
+    }
     cout << "    Recherche des dossiers doublons..." << endl;
     mabase->sqlSetDossierDoublons();
-    cout << "    Mise à jour de config.cfg" << endl;
-	regenerateFicCfg();
+    //cout << "    Mise à jour de config.cfg" << endl;
+    //regenerateFicCfg();
 }
 
 void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
@@ -229,7 +233,7 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
         mabase->sqlInsertDossier(thePair.second->string());
     }
     Fichier f;
-	while(!directories.empty()){
+    while(!directories.empty() && STOP == false){
 		try{
 			if(exists(*directories.front())){
 				directory_iterator it(*directories.front());
@@ -314,7 +318,9 @@ void Parcours::resetFicCfg(int8_t error) {
 }
 
 void Parcours::regenerateFicCfg(int err) {
-    cout<<"Régénération fichier config.cfg..."<<endl;
+    if(err!=1)
+        cout << "Régénération fichier config.cfg..." << endl;
+    else cout << "Récupération des fichiers en cas d'erreur..." << endl;
 	ofstream config(cheminFicCfg, ios_base::out);
 	if (config) {
 		map<string, path*>::iterator it = listeblanche.begin();
@@ -337,5 +343,7 @@ void Parcours::regenerateFicCfg(int err) {
 		config.close();
 	}
     else cout << "    Erreur ouverture fichier config (" << cheminFicCfg << ")." << endl;
-    cout<<"    config.cfg régénéré."<<endl;
+    if(err!=1)
+        cout << "    config.cfg régénéré."<<endl;
+    else cout << "    Récupération prête..." << endl;
 }
