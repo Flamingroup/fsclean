@@ -352,7 +352,7 @@ bool Sql::isDossierDoublon(const string& chemin){
         return false;
     }
     string concatene=chemin;
-    concatene+='%';
+    concatene+="/%";
     QSqlQuery query(db);
     query.prepare(QString("SELECT COUNT(*) FROM Fichiers WHERE chemin LIKE :chemin and MD5 IS NULL"));
     query.bindValue(":chemin", QString(concatene.c_str()));
