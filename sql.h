@@ -8,9 +8,19 @@
 
 class Sql {
 private :
+        /**
+         * @brief db : Base de donnée du programme
+         */
 		QSqlDatabase db;
+        /**
+         * @brief _instance : Instance de la classe SQL : DP singleton
+         */
 		static Sql* _instance;
-		Sql(path* p=new path("fsclean.db"));
+        /**
+         * @brief Sql constructeur de SQL
+         * @param p path
+         */
+        Sql(string cheminBdd="fsclean.db");
         QMutex mutex;
 public:
         string MD5 = "SELECT chemin, filenametrime, poids, datemodif, MD5 FROM Fichiers WHERE(MD5 IN(SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1))ORDER BY MD5,chemin";

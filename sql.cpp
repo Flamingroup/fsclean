@@ -1,4 +1,5 @@
 #include "sql.h"
+#include "parcours.h"
 #include <QVariant>
 #include <QString>
 #include <QMap>
@@ -15,8 +16,9 @@
 
 Sql* Sql::_instance=NULL;
 
-Sql::Sql(path* p) {
-	if (exists(p->string())){
+Sql::Sql(string cheminBdd) {
+    path *p=Parcours::stringToPath(cheminBdd);
+    if (p != NULL){
 		db = QSqlDatabase::addDatabase("QSQLITE");
 		db.setDatabaseName((QString)p->string().c_str());
 		if (!db.open()) {
@@ -42,6 +44,7 @@ Sql::Sql(path* p) {
         cerr << "    Error occurred creating table." << endl;
 		db.close();
 		unlink(p->string().c_str());
+        delete p;
 		mutex.unlock();
 		throw 3;
 	}
@@ -50,11 +53,13 @@ Sql::Sql(path* p) {
         cerr << "    Error occurred creating table." << endl;
 		db.close();
 		unlink(p->string().c_str());
+        delete p;
 		mutex.unlock();
 		throw 4;
 	}
 	mutex.unlock();
 	db.close();
+    delete p;
 	return;
 }
 
