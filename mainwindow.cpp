@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	displayNbElemBDDInStatusBar();
 	ui->progressBar->setValue(Parcours::AVANCE);
     ui->tabWidget->setCurrentIndex(0);
-	on_Buttonrafraichir_clicked();
+    on_Buttonrafraichir_clicked();
     ui->tableDoublonsFicS->resizeColumnsToContents();
     ui->tableDoublonsFicP->resizeColumnsToContents();
     ui->tableDoublonsD->resizeColumnsToContents();
@@ -42,9 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-	if (scan != NULL){
-		delete scan;
-	}
+    delete scan;
     delete ui;
 	delete timer;
 }
@@ -52,8 +50,6 @@ MainWindow::~MainWindow()
 void MainWindow::on_scanButton_clicked()
 {
     //cout<<"lancement thread.."<<endl;
-    if (scan == NULL)
-		scan=new Thread;
     if(!scan->isRunning()){
         Parcours *p = Parcours::getInstance();
         if(p->listeblanche.empty()){
@@ -110,8 +106,6 @@ void MainWindow::FinScan()
 	setLEDGreen();
 	displayNbElemBDDInStatusBar();
     on_Buttonrafraichir_clicked();
-    delete scan;
-    scan=NULL;
 }
 
 void MainWindow::bloquerSuppr(int index)
@@ -241,26 +235,23 @@ void MainWindow::on_Buttonrafraichir_clicked()
         cout <<"    Vous ne pouvez rafraichir pendant un scan."<<endl;
 		return;
     }
-    QItemSelectionModel *table;
     static bool premFS = true;
     static bool premFP = true;
     static bool premDP = true;
     if(! premFS){
         if(ui->tabWidget->currentIndex() == 0){//case 1st tab
             ui->tableDoublonsFicS->selectAll();
-            table = ui->tableDoublonsFicS->selectionModel();
+            QItemSelectionModel *table = ui->tableDoublonsFicS->selectionModel();
             QModelIndexList indexes = table->selectedIndexes();
             for(QModelIndex i :indexes)
                 ui->tableDoublonsFicS->showRow(i.row());
         }
-    }/*
-    if(!premFD){
+    }
+    if(!premFP){
         if(ui->tabWidget->currentIndex() == 1){//case 2nd tab
                 ui->tableDoublonsFicP->selectAll();
                 QItemSelectionModel * table = ui->tableDoublonsFicP->selectionModel();
-                cout<<"ok"<<endl;
                 QModelIndexList indexes = table->selectedIndexes();
-                cout<<"okok"<<endl;
                 for(QModelIndex i :indexes)
                     ui->tableDoublonsFicP->showRow(i.row());
             }
@@ -275,31 +266,30 @@ void MainWindow::on_Buttonrafraichir_clicked()
                 ui->tableDoublonsD->showRow(i.row());
             cout<<"ultime ok"<<endl;
             }
-    }*/
+    }
     cout <<"    Objets cachés révélés"<<endl;
     //j'ai tenté cette méthode avec des switch : tonne de problemes avec les déclarations
     //de variable dans les if, finalement pas plus simple que des if imbriqués
     //if (!scan->isRunning()){
-    cout<<"scan not running" <<endl;
     Sql* mabase=Sql::getInstance();
     if(ui->tabWidget->currentIndex() == 0){//onglet 0 fichiers surs
         QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->MD5);
         ui->tableDoublonsFicS->setModel(reponse);
         ui->tableDoublonsFicS->resizeColumnsToContents();
+        premFS = false;
     }
     else if(ui->tabWidget->currentIndex() == 1){//onglet 1 fichiers potentiels
         QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->filenametrime);
         ui->tableDoublonsFicP->setModel(reponse);
         ui->tableDoublonsFicP->resizeColumnsToContents();
+        premFP = false;
     }
     else if(ui->tabWidget->currentIndex() == 2){//onglet 2 dossiers potentiels
         QSqlQueryModel *reponse = mabase->sqlSelectDoublons(mabase->dossier);
         ui->tableDoublonsD->setModel(reponse);
         ui->tableDoublonsD->resizeColumnsToContents();
+        premDP = false;
     }
-    premFS = false;
-    premFP = false;
-    premDP = false;
     cout << "    Rafraichissement terminé."<<endl;
 }
 
