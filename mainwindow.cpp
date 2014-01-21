@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableDoublonsFicS->resizeColumnsToContents();
     ui->tableDoublonsFicP->resizeColumnsToContents();
     ui->tableDoublonsD->resizeColumnsToContents();
+    ui->quitButton->setDisabled(true);
     cout<<"GUI [ok]"<<endl;
 }
 
@@ -63,8 +64,11 @@ void MainWindow::on_scanButton_clicked()
         ui->WLplusButton->setDisabled(true);
         ui->lessBLButton->setDisabled(true);
         ui->lessWLButton->setDisabled(true);
+        ui->scanButton->setDisabled(true);
+        ui->quitButton->setDisabled(false);
         setLEDRed();
         scan->start();
+        cout << "Scan en cours..." << endl;
         displayInStatusBar("Scan en cours...");
     }
 }
@@ -102,6 +106,7 @@ void MainWindow::FinScan()
     ui->WLplusButton->setDisabled(false);
     ui->lessBLButton->setDisabled(false);
     ui->lessWLButton->setDisabled(false);
+    ui->scanButton->setDisabled(false);
 	setLEDGreen();
 	displayNbElemBDDInStatusBar();
     on_Buttonrafraichir_clicked();
@@ -236,26 +241,32 @@ void MainWindow::on_Buttonrafraichir_clicked()
         cout <<"    Vous ne pouvez rafraichir pendant un scan."<<endl;
 		return;
     }
-	static bool prem = true;
-    if(! prem){
+    QItemSelectionModel *table;
+    static bool premFS = true;
+    static bool premFP = true;
+    static bool premDP = true;
+    if(! premFS){
         if(ui->tabWidget->currentIndex() == 0){//case 1st tab
             ui->tableDoublonsFicS->selectAll();
-            QItemSelectionModel * table = ui->tableDoublonsFicS->selectionModel();
+            table = ui->tableDoublonsFicS->selectionModel();
             QModelIndexList indexes = table->selectedIndexes();
             for(QModelIndex i :indexes)
                 ui->tableDoublonsFicS->showRow(i.row());
-        }/*
-        else if(ui->tabWidget->currentIndex() == 1){//case 2nd tab
-            ui->tableDoublonsFicP->selectAll();
-
-            QItemSelectionModel * table = ui->tableDoublonsFicP->selectionModel();
-            cout<<"ok"<<endl;
-            QModelIndexList indexes = table->selectedIndexes();
-            cout<<"okok"<<endl;
-            for(QModelIndex i :indexes)
-                ui->tableDoublonsFicP->showRow(i.row());
-        }*//*
-        else if(ui->tabWidget->currentIndex() == 2){//case 3rd tab
+        }
+    }/*
+    if(!premFD){
+        if(ui->tabWidget->currentIndex() == 1){//case 2nd tab
+                ui->tableDoublonsFicP->selectAll();
+                QItemSelectionModel * table = ui->tableDoublonsFicP->selectionModel();
+                cout<<"ok"<<endl;
+                QModelIndexList indexes = table->selectedIndexes();
+                cout<<"okok"<<endl;
+                for(QModelIndex i :indexes)
+                    ui->tableDoublonsFicP->showRow(i.row());
+            }
+    }
+    if(!premDP){
+            if(ui->tabWidget->currentIndex() == 2){//case 3rd tab
             cout << "ok ou pas?" << endl;
             ui->tableDoublonsD->selectAll();
             QItemSelectionModel * table = ui->tableDoublonsD->selectionModel();
@@ -263,9 +274,9 @@ void MainWindow::on_Buttonrafraichir_clicked()
             for(QModelIndex i :indexes)
                 ui->tableDoublonsD->showRow(i.row());
             cout<<"ultime ok"<<endl;
-        }*/
-        cout <<"    Objets cachés révélés"<<endl;
-    }
+            }
+    }*/
+    cout <<"    Objets cachés révélés"<<endl;
     //j'ai tenté cette méthode avec des switch : tonne de problemes avec les déclarations
     //de variable dans les if, finalement pas plus simple que des if imbriqués
     //if (!scan->isRunning()){
@@ -286,9 +297,10 @@ void MainWindow::on_Buttonrafraichir_clicked()
         ui->tableDoublonsD->setModel(reponse);
         ui->tableDoublonsD->resizeColumnsToContents();
     }
-    //}if inutile, on a déjà fait un return dans le cas contraire.
-    prem = false;
-    cout<<"    Rafraichissement terminé."<<endl;
+    premFS = false;
+    premFP = false;
+    premDP = false;
+    cout << "    Rafraichissement terminé."<<endl;
 }
 
 void MainWindow::on_Buttonsupprimer_clicked()
@@ -324,7 +336,7 @@ void MainWindow::on_Buttonsupprimer_clicked()
 void MainWindow::on_Buttonmasquer_clicked()
 {   //tab 0 : doublons fichiers, 1 : doublons fichiers potentiels, 2 : doublons dossiers
     int numTab = ui->tabWidget->currentIndex();
-    if(numTab == 0){
+    if(numTab == 0 ){
         QItemSelectionModel * lignes = ui->tableDoublonsFicS->selectionModel();
         QModelIndexList indexes = lignes->selectedIndexes();
         for(QModelIndex i :indexes)
@@ -346,12 +358,21 @@ void MainWindow::on_Buttonmasquer_clicked()
 
 void MainWindow::on_quitButton_clicked()
 {
+    cout << "QuitButton_clicked()..." << endl;
     if(scan->isRunning()){
-        scan->exit();
+        ui->quitButton->setDisabled(true);
+        cout << "    Arret du scan en cours..." << endl;
+        displayInStatusBar("Arret du scan en cours...");
+        sleep(20);
+        scan->exit(0);
+        scan->wait();
+        cout << "    Thread enfin fini..." << endl;
         Parcours *p  = Parcours::getInstance();
         p->countApprox();
         p->regenerateFicCfg();
         delete scan;
         scan = NULL;
+        ui->scanButton->setDisabled(false);
     }
+    cout << "Fin quitBurron_clicked()." << endl;
 }
