@@ -15,9 +15,8 @@
 
 Sql* Sql::_instance=NULL;
 
-Sql::Sql(string cheminBdd) {
-    path *p=Parcours::stringToPath(cheminBdd);
-    if (p != NULL){
+Sql::Sql(path* p) {
+    if (exists(p->string())){
 		db = QSqlDatabase::addDatabase("QSQLITE");
 		db.setDatabaseName((QString)p->string().c_str());
 		if (!db.open()) {

@@ -20,7 +20,7 @@ private :
          * @brief Sql constructeur de SQL
          * @param p path
          */
-        Sql(string cheminBdd="fsclean.db");
+        Sql(path* p=new path("fsclean.db"));
         /**
          * @brief mutex : Mutex d'accès à la base de données
          */
