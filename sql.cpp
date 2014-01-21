@@ -330,7 +330,7 @@ bool Sql::sqlCreateMD5(){
 		mutex.unlock();
 		return false;
 	}
-	while (query.next()) {
+    while (query.next() && Parcours::STOP == false) {
 		try {
 			tmp=new Fichier(query);
 		}

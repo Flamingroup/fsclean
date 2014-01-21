@@ -11,7 +11,8 @@ void Thread::run()
 	Parcours *p=Parcours::getInstance();
     p->regenerateFicCfg(1);
     cout<<"Début scan..."<<endl;
-	p->runAll();
+    if(!Parcours::STOP)
+        p->runAll();
     p->regenerateFicCfg();
     cout<<"Fin scan."<<endl;
     emit scanFinished();

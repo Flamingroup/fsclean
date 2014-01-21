@@ -197,7 +197,8 @@ void MainWindow::on_actionReinitialiser_param_defaut_triggered()
 	p->resetFicCfg();
 	remplirBL();
 	remplirWL();
-    on_Buttonrafraichir_clicked();
+    p->countApprox();
+    displayNbElemBDDInStatusBar();
 }
 
 void MainWindow::on_WLplusButton_clicked()

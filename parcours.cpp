@@ -206,16 +206,19 @@ void Parcours::runAll() {
 	map<string, path*>::iterator it=listeblanche.begin();
 	map<string, path*>::iterator end=listeblanche.end();
 	for(; it!=end; ++it){
-		runFromPath(*it);
+        if(!STOP)
+            runFromPath(*it);
     }
     cout << "    Suppression des fichiers non existants..." << endl;
-	mabase->sqlDelDeletedFiles();
-    cout << "    Calcul des clés MD5..." << endl;
-	mabase->sqlCreateMD5();
+    mabase->sqlDelDeletedFiles();
+    if(!STOP){
+        cout << "    Calcul des clés MD5..." << endl;
+        mabase->sqlCreateMD5();
+    }
     cout << "    Recherche des dossiers doublons..." << endl;
     mabase->sqlSetDossierDoublons();
-    cout << "    Mise à jour de config.cfg" << endl;
-	regenerateFicCfg();
+    //cout << "    Mise à jour de config.cfg" << endl;
+    //regenerateFicCfg();
 }
 
 void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
@@ -230,7 +233,7 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
         mabase->sqlInsertDossier(thePair.second->string());
     }
     Fichier f;
-	while(!directories.empty()){
+    while(!directories.empty() && STOP == false){
 		try{
 			if(exists(*directories.front())){
 				directory_iterator it(*directories.front());
