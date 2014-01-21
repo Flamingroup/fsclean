@@ -360,8 +360,7 @@ void MainWindow::on_quitButton_clicked()
         ui->quitButton->setDisabled(true);
         cout << "    Arret du scan en cours..." << endl;
         displayInStatusBar("Arret du scan en cours...");
-        Parcours::STOP=true;
-        //scan->exit(0);
+		Parcours::STOP=true;
         scan->wait();
         Parcours::STOP=false;
         cout << "    Thread enfin fini..." << endl;

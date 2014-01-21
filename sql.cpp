@@ -394,6 +394,7 @@ bool Sql::sqlCreateMD5(){
 	list<Fichier*>::iterator fin=lf.end();
 	while (it != fin) {
 		sqlSetMd5(**it);
+		delete (*it);
 		it=lf.erase(it);
 	}
     db.close();
@@ -558,18 +559,21 @@ bool Sql::isDossierParent(const string& chemin){
 	mutex.lock();
 	if (!query.exec()) {
 		cerr << "    Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
-		db.close();
 		mutex.unlock();
+		db.close();
+		delete p;
 		return false;
 	}
 	if (query.next()) {
-		db.close();
 		mutex.unlock();
+		db.close();
+		delete p;
 		return false;
 	}
 	else {
-		db.close();
 		mutex.unlock();
+		db.close();
+		delete p;
 		return true;
 	}
 }

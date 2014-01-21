@@ -167,7 +167,7 @@ void Parcours::addToWL(string chemin) {
 }
 
 void Parcours::addToBL(string chemin) {
-    path *tmp = stringToPath(chemin);
+	path *tmp = stringToPath(chemin, false);
 	if (tmp == NULL) return;
     cout << "    Ajout liste noire : " << tmp->string() <<endl;
     if (listenoire.find(tmp->string()) == listenoire.end())
@@ -176,15 +176,15 @@ void Parcours::addToBL(string chemin) {
 }
 
 void Parcours::rmvFromWL(string chemin) {
-	path *tmp = stringToPath(chemin);
+	path *tmp = stringToPath(chemin, false);
 	if (tmp == NULL) return;
 	map<string, path*>::iterator it=listeblanche.find(tmp->string());
 	if (it != listeblanche.end()){
         cout << tmp->string() << " oté de la liste blanche." << endl;
 		delete (it->second);
+		delete tmp;
 		listeblanche.erase(it);
     }
-
 }
 
 void Parcours::rmvFromBL(string chemin) {
@@ -194,6 +194,7 @@ void Parcours::rmvFromBL(string chemin) {
 	if (it != listenoire.end()){
         cout << tmp->string() << " oté de la liste noire." << endl;
 		delete (it->second);
+		delete tmp;
 		listenoire.erase(it);
 	}
 }
@@ -266,6 +267,10 @@ void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {
 			delete directories.front();
 			directories.pop_front();
 		}
+	}
+	while(!directories.empty()){
+		delete directories.front();
+		directories.pop_front();
 	}
 }
 
