@@ -276,6 +276,8 @@ bool Parcours::isInBlacklist(const path & p) {
 }
 
 bool Parcours::isHidden(const path& p) {
+	if (scannercaches == true)
+		return false;
 	if (p.string().find("/.") == p.string().npos)
 		return false;
 	return true;
@@ -300,7 +302,9 @@ void Parcours::resetFicCfg(int8_t error) {
 			   << "nombreapprox" << endl
                << "0" << endl
                << "error" << endl
-               << error <<endl;
+			   << error << endl
+			   << "Uncomment the following line to scan hidden files" << endl
+			   << "#scannercaches=1" << endl;
         config.close();
         listeblanche.clear();
         listenoire.clear();
@@ -338,7 +342,13 @@ void Parcours::regenerateFicCfg(int err) {
         config << "nombreapprox" << endl << nbApprox << endl;
         config << "error" << endl << err << endl;
 		if(scannercaches){
-            cout << "    Scan des fichiers cachés activés" << endl;
+			cout << "    Scan des fichiers cachés activés" << endl;
+			config << "Comment the following line not to scan hidden files" << endl;
+			config << "scannercaches=1" << endl;
+		}
+		else {
+			config << "Uncomment the following line to scan hidden files" << endl
+			<< "#scannercaches=1" << endl;
 		}
 		config.close();
 	}
