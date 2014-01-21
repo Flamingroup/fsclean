@@ -81,7 +81,6 @@ void MainWindow::displayNbElemBDDInStatusBar()
 {
 	Parcours *p=Parcours::getInstance();
 	ostringstream os;
-    //p->countApprox();
     os<<p->getNbApprox();
 	string str = os.str();
     str+=" fichiers potentiels dans la zone de scan.";
