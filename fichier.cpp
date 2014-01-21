@@ -21,7 +21,7 @@ Fichier::Fichier(QSqlQuery& query)
 	id=query.value(0).toUInt();
 	path* p=Parcours::stringToPath(query.value(1).toString().toStdString()); // si segfault : faire par copie
 	if (p == NULL) {
-		cerr << query.value(1).toString().toStdString() << " n'existe pas, suppression de ce fichier dans la base de donnée" << endl;
+        cerr << query.value(1).toString().toStdString() << " n'existe pas, suppression de ce fichier dans la base de donnée" << endl;
 		Sql* mabase=Sql::getInstance();
 		mabase->sqlDelete(query.value(1).toString().toStdString());
 		throw 1;
