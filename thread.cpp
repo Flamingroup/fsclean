@@ -8,9 +8,9 @@ Thread::Thread()
 
 void Thread::run()
 {
-    cout<<"Début scan..."<<endl;
 	Parcours *p=Parcours::getInstance();
     p->regenerateFicCfg(1);
+    cout<<"Début scan..."<<endl;
 	p->runAll();
     p->regenerateFicCfg();
     cout<<"Fin scan."<<endl;

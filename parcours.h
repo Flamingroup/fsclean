@@ -49,6 +49,10 @@ class Parcours
          * @brief AVANCE : Pourcentage d'avancement du scan
          */
         static char AVANCE;
+        /**
+         * @brief STOP : booleen qui arrete le scan à tout moment
+         */
+        static bool STOP;
 		/**
          * @brief listeblanche : Chemins des dossiers à scanner
         */

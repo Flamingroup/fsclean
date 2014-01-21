@@ -31,6 +31,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	remplirBL();
 	displayNbElemBDDInStatusBar();
 	ui->progressBar->setValue(Parcours::AVANCE);
+    ui->tabWidget->setCurrentIndex(1);
+    on_Buttonrafraichir_clicked();
+    ui->tabWidget->setCurrentIndex(2);
+    on_Buttonrafraichir_clicked();
     ui->tabWidget->setCurrentIndex(0);
     on_Buttonrafraichir_clicked();
     ui->tableDoublonsFicS->resizeColumnsToContents();
@@ -77,7 +81,7 @@ void MainWindow::displayNbElemBDDInStatusBar()
 {
 	Parcours *p=Parcours::getInstance();
 	ostringstream os;
-    p->countApprox();
+    //p->countApprox();
     os<<p->getNbApprox();
 	string str = os.str();
     str+=" fichiers potentiels dans la zone de scan.";
@@ -106,6 +110,11 @@ void MainWindow::FinScan()
 	setLEDGreen();
 	displayNbElemBDDInStatusBar();
     on_Buttonrafraichir_clicked();
+    ui->tabWidget->setCurrentIndex(1);
+    on_Buttonrafraichir_clicked();
+    ui->tabWidget->setCurrentIndex(2);
+    on_Buttonrafraichir_clicked();
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 void MainWindow::bloquerSuppr(int index)
@@ -158,6 +167,7 @@ void MainWindow::on_lessWLButton_clicked()
         cout<<"Oté de la liste blanche : "<<s.toStdString()<<endl;
 		Parcours *p=Parcours::getInstance();
 		p->rmvFromWL(s.toStdString());
+        p->countApprox();
 		p->regenerateFicCfg();
 		remplirWL();
 		displayNbElemBDDInStatusBar();
@@ -173,6 +183,7 @@ void MainWindow::on_lessBLButton_clicked()
         cout<<"Ajouté à la liste blanche : "<<s.toStdString()<<endl;
 		Parcours *p=Parcours::getInstance();
 		p->rmvFromBL(s.toStdString());
+        p->countApprox();
 		p->regenerateFicCfg();
 		remplirBL();
 		displayNbElemBDDInStatusBar();
@@ -195,6 +206,7 @@ void MainWindow::on_WLplusButton_clicked()
 	if(inclusion.length() > 0){
 		Parcours *p=Parcours::getInstance();
 		p->addToWL(inclusion.toStdString());
+        p->countApprox();
 		p->regenerateFicCfg();
 		remplirWL();
         inclusion+=" est maintenant dans la liste blanche.";
@@ -213,6 +225,7 @@ void MainWindow::on_plusBLButton_clicked()
 	if(exclusion.length() > 0){
 		Parcours *p=Parcours::getInstance();
 		p->addToBL(exclusion.toStdString());
+        p->countApprox();
 		p->regenerateFicCfg();
 		remplirBL();
         exclusion+=" est maintenant dans la liste noire.";
@@ -230,7 +243,7 @@ void MainWindow::on_actionA_propos_triggered()
 
 void MainWindow::on_Buttonrafraichir_clicked()
 {
-    cout << endl <<"Rafraichissement de l'onglet "<<ui->tabWidget->currentIndex()<< "..." <<endl;
+    cout <<"Rafraichissement de l'onglet "<<ui->tabWidget->currentIndex()<< "..." <<endl;
     if (scan->isRunning()){
         cout <<"    Vous ne pouvez rafraichir pendant un scan."<<endl;
 		return;
@@ -258,13 +271,11 @@ void MainWindow::on_Buttonrafraichir_clicked()
     }
     if(!premDP){
             if(ui->tabWidget->currentIndex() == 2){//case 3rd tab
-            cout << "ok ou pas?" << endl;
             ui->tableDoublonsD->selectAll();
             QItemSelectionModel * table = ui->tableDoublonsD->selectionModel();
             QModelIndexList indexes = table->selectedIndexes();
             for(QModelIndex i :indexes)
                 ui->tableDoublonsD->showRow(i.row());
-            cout<<"ultime ok"<<endl;
             }
     }
     cout <<"    Objets cachés révélés"<<endl;
@@ -353,15 +364,14 @@ void MainWindow::on_quitButton_clicked()
         ui->quitButton->setDisabled(true);
         cout << "    Arret du scan en cours..." << endl;
         displayInStatusBar("Arret du scan en cours...");
-        sleep(20);
-        scan->exit(0);
+        Parcours::STOP=true;
+        //scan->exit(0);
         scan->wait();
+        Parcours::STOP=false;
         cout << "    Thread enfin fini..." << endl;
         Parcours *p  = Parcours::getInstance();
         p->countApprox();
         p->regenerateFicCfg();
-        delete scan;
-        scan = NULL;
         ui->scanButton->setDisabled(false);
     }
     cout << "Fin quitBurron_clicked()." << endl;

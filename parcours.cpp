@@ -6,6 +6,7 @@
 #include <fstream>
 
 char Parcours::AVANCE = 0;
+bool Parcours::STOP = false;
 Parcours* Parcours::_instance=NULL;
 
 enum State{waitWL=0, scanWL=1,scanBL=2, getNbDBfic=3,errorStatus=4};
@@ -314,7 +315,9 @@ void Parcours::resetFicCfg(int8_t error) {
 }
 
 void Parcours::regenerateFicCfg(int err) {
-    cout<<"Régénération fichier config.cfg..."<<endl;
+    if(err!=1)
+        cout << "Régénération fichier config.cfg..." << endl;
+    else cout << "Récupération des fichiers en cas d'erreur..." << endl;
 	ofstream config(cheminFicCfg, ios_base::out);
 	if (config) {
 		map<string, path*>::iterator it = listeblanche.begin();
@@ -337,5 +340,7 @@ void Parcours::regenerateFicCfg(int err) {
 		config.close();
 	}
     else cout << "    Erreur ouverture fichier config (" << cheminFicCfg << ")." << endl;
-    cout<<"    config.cfg régénéré."<<endl;
+    if(err!=1)
+        cout << "    config.cfg régénéré."<<endl;
+    else cout << "    Récupération prête..." << endl;
 }
