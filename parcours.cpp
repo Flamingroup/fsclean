@@ -217,8 +217,8 @@ void Parcours::runAll() {
     }
     cout << "    Recherche des dossiers doublons..." << endl;
     mabase->sqlSetDossierDoublons();
-    //cout << "    Mise à jour de config.cfg" << endl;
-    //regenerateFicCfg();
+    cout << "    Mise à jour de config.cfg" << endl;
+    regenerateFicCfg();
 }
 
 void Parcours::runFromPath(const pair<string, path*>& thePair, bool countOnly) {

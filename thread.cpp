@@ -13,7 +13,6 @@ void Thread::run()
     cout<<"Début scan..."<<endl;
     if(!Parcours::STOP)
         p->runAll();
-    p->regenerateFicCfg();
     cout<<"Fin scan."<<endl;
     emit scanFinished();
 }

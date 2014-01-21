@@ -244,10 +244,6 @@ void MainWindow::on_actionA_propos_triggered()
 void MainWindow::on_Buttonrafraichir_clicked()
 {
     cout <<"Rafraichissement de l'onglet "<<ui->tabWidget->currentIndex()<< "..." <<endl;
-    if (scan->isRunning()){
-        cout <<"    Vous ne pouvez rafraichir pendant un scan."<<endl;
-		return;
-    }
     static bool premFS = true;
     static bool premFP = true;
     static bool premDP = true;

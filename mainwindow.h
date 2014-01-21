@@ -104,14 +104,22 @@ private slots:
      * et ses développeurs
      */
     void on_actionA_propos_triggered();
-
-
+    /**
+     * @brief on_Buttonrafraichir_clicked : rafraichit l'affichage de la GUI, seul l'onglet visible est
+     * rafraichi, les lignes masqués sont à nouveau visibles
+     */
 	void on_Buttonrafraichir_clicked();
-
+    /**
+     * @brief on_Buttonsupprimer_clicked : supprime les lignes sélectionnées dans la table
+     */
     void on_Buttonsupprimer_clicked();
-
+    /**
+     * @brief on_Buttonmasquer_clicked : masque les lignes selectionnées dans la table
+     */
     void on_Buttonmasquer_clicked();
-
+    /**
+     * @brief on_quitButton_clicked : arrête le scan en cours
+     */
     void on_quitButton_clicked();
 
 private:

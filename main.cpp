@@ -18,8 +18,11 @@ using namespace std;
 int main(int argc, char *argv[])
 {  
 	if (argc == 1){
+        cout << "Début scan..." << endl;
 		Parcours* parc=Parcours::getInstance();
+        parc->regenerateFicCfg(1);
 		parc->runAll();
+        cout << "Fin scan." << endl;
 	}
 	if (argc > 1 && string(argv[1]) == "-gui") {
 		QApplication app(argc,argv);
