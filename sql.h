@@ -31,7 +31,8 @@ public:
          */
         string MD5 = "SELECT chemin, filenametrime, poids, datemodif, MD5 FROM Fichiers WHERE(MD5 IN(SELECT MD5 FROM Fichiers WHERE 1 GROUP BY MD5 HAVING COUNT(MD5)>1))ORDER BY MD5,chemin";
         string filenametrime = "SELECT chemin, filenametrime, poids, datemodif FROM Fichiers WHERE filenametrime IN (SELECT filenametrime FROM Fichiers WHERE 1 GROUP BY filenametrime HAVING COUNT(filenametrime)>1) ORDER BY filenametrime,chemin";
-        string dossier = "SELECT chemin, nbfic FROM Dossiers WHERE isdoublon = 1 AND nbfic > 0 AND nbfic IN (SELECT nbfic FROM Dossiers WHERE 1 GROUP BY nbfic HAVING COUNT(nbfic)>1) ORDER BY nbfic DESC, chemin";
+//        string dossier = "SELECT chemin, nbfic FROM Dossiers WHERE isdoublon = 1 AND nbfic > 0 AND nbfic IN (SELECT nbfic FROM Dossiers WHERE 1 GROUP BY nbfic HAVING COUNT(nbfic)>1) ORDER BY nbfic DESC, chemin";
+        string dossier = "SELECT chemin, nbfic FROM Dossiers WHERE isparent = 1 AND nbfic > 0 AND nbfic IN (SELECT nbfic FROM Dossiers WHERE 1 GROUP BY nbfic HAVING COUNT(nbfic)>1) ORDER BY nbfic DESC, chemin";
         /**
          * @brief getInstance : Récupère l'instance de Sql et la créé si besoin
          * @return pointeur sur la classe Sql
@@ -100,6 +101,7 @@ public:
          * @return NULL en cas de problème ou un pointeur sur un qsqlqueryModel
          */
         QSqlQueryModel *sqlSelectDoublons(string select);
+        bool isDossierParent(const string &chemin);
 };
 
 #endif // SQL_H

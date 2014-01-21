@@ -46,7 +46,7 @@ Sql::Sql(path* p) {
 		mutex.unlock();
 		throw 3;
 	}
-    query.prepare("CREATE TABLE IF NOT EXISTS Dossiers (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, chemin TEXT UNIQUE, stillexist INTEGER, isdoublon INTEGER, nbfic INTEGER)");
+    query.prepare("CREATE TABLE IF NOT EXISTS Dossiers (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, chemin TEXT UNIQUE, stillexist INTEGER, isdoublon INTEGER, nbfic INTEGER, isparent INTEGER)");
 	if (!query.exec()) {
         cerr << "    Error occurred creating table." << endl;
 		db.close();
@@ -152,7 +152,7 @@ bool Sql::sqlInsertDossier(const string& str){
 	}
 	if (query.next()) {
 		QSqlQuery query2(db);
-		query2.prepare("UPDATE Dossiers SET stillexist = 1, isdoublon = 0 WHERE id = :id");
+        query2.prepare("UPDATE Dossiers SET stillexist = 1, isdoublon = 0, isparent = 0 WHERE id = :id");
 		query2.bindValue(":id", query.value(0).toInt());
 		if (!query2.exec()) {
 			cerr << "Error occurred while Updating the flag of dossiers." << query2.lastError().driverText().toStdString() << " " << query2.lastQuery().toStdString() << endl;
@@ -166,7 +166,7 @@ bool Sql::sqlInsertDossier(const string& str){
         return true;
 	}
 	mutex.unlock();
-	query.prepare("INSERT INTO Dossiers (chemin, stillexist, isdoublon) VALUES (:chemin, 1, 0)");
+    query.prepare("INSERT INTO Dossiers (chemin, stillexist, isdoublon, isparent) VALUES (:chemin, 1, 0, 0)");
 	query.bindValue(":chemin", QString(str.c_str()));
 	mutex.lock();
 	if (!query.exec()) {
@@ -221,7 +221,7 @@ bool Sql::sqlRaz() {
 		mutex.unlock();
         return false;
 	}
-	query.prepare("UPDATE Dossiers SET stillexist = 0, isdoublon = 0");
+    query.prepare("UPDATE Dossiers SET stillexist = 0, isdoublon = 0, isparent = 0");
 	if (!query.exec()) {
         cerr << "    Error occurred while RAZing the flag." << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
 		mutex.unlock();
@@ -429,7 +429,29 @@ bool Sql::sqlSetDossierDoublons(){
                 return 0;
             }
             QSqlQuery query2(db);
-            query2.prepare(QString("UPDATE Dossiers SET isdoublon = 1 WHERE chemin = :chemin"));
+            query2.prepare(QString("UPDATE Dossiers SET isdoublon = 1, isparent = 1 WHERE chemin = :chemin"));
+            query2.bindValue(":chemin", QString((*it).c_str()));
+            mutex.lock();
+            if (!query2.exec()) {
+                cerr << "    Error occurred while Updating flag doublons dossier. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+            }
+            db.close();
+            mutex.unlock();
+            ++it;
+        }
+        else {
+            it = ls.erase(it);
+        }
+    }
+    it = ls.begin();
+    while (it != fin) {
+        if (!isDossierParent(*it)){
+            if (!db.open()) {
+                cerr << "    Error occurred opening the database." << endl;
+                return 0;
+            }
+            QSqlQuery query2(db);
+            query2.prepare(QString("UPDATE Dossiers SET isparent = 0 WHERE chemin = :chemin"));
             query2.bindValue(":chemin", QString((*it).c_str()));
             mutex.lock();
             if (!query2.exec()) {
@@ -472,4 +494,32 @@ QSqlQueryModel* Sql::sqlSelectDoublons(string select){
     db.close();
     //cout << "noerror" << endl;
     return model;
+}
+
+bool Sql::isDossierParent(const string& chemin){
+    if (!db.open()) {
+        cerr << "    Error occurred opening the database." << endl;
+        return false;
+    }
+    QSqlQuery query(db);
+    path *p=Parcours::stringToPath(chemin);
+    query.prepare(QString("SELECT * FROM Dossiers WHERE chemin = :chemin AND isdoublon = 1"));
+    query.bindValue(":chemin", QString(p->branch_path().string().c_str()));
+    mutex.lock();
+    if (!query.exec()) {
+        cerr << "    Error occurred while selecting doublons MD5. " << query.lastError().driverText().toStdString() << " " << query.lastQuery().toStdString() << endl;
+        db.close();
+        mutex.unlock();
+        return false;
+    }
+    if (query.next()) {
+        db.close();
+        mutex.unlock();
+        return false;
+    }
+    else {
+        db.close();
+        mutex.unlock();
+        return true;
+    }
 }
