@@ -2,8 +2,11 @@ fsclean
 =======
 
 === Noms/prénoms du binôme ===
+
 Bouterige Raphael
 Daval Loic
+
+
 == Parcours ==
 * parcourt des arborescences de fichier
 * calcule des clefs de hachage (MD5, SHA...)
@@ -44,8 +47,8 @@ Mon programme a d'autres fonctionnalités, que je liste ici:
 * En cas de suppression par l'utilisateur, le fichier config.cfg est régénéré.
 
 == Bibliothèques utilisées ==
-Listez ici les bibliothèques utilisées. Si vous avez récupéré des bouts de
-code d'ailleurs, précisez lesquels et leur provenance.
+
+Listez ici les bibliothèques utilisées. Si vous avez récupéré des bouts de code d'ailleurs, précisez lesquels et leur provenance.
 * QT
 * Boost
 * libTomCrypt
